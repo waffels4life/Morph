@@ -14,6 +14,27 @@ public class Process {
     public void inputFile(String pathname) {
         this.input = new File(pathname);
     }
+
+    public void imageReader() {
+        if (input == null)
+            throw new RuntimeException();
+
+        try {
+            this.image = ImageIO.read(input);
+        }
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public BufferedImage resizeImage(BufferedImage image) {
+        return new BufferedImage(
+                600,
+                800,
+                BufferedImage.TYPE_INT_RGB
+        );
+    }
+
     public File getOutput() {
         return output;
     }
