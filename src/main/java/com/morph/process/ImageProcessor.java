@@ -30,6 +30,7 @@ public final class ImageProcessor {
     public File process() {
         try {
             BufferedImage source = read();
+            scale(source.getWidth(), source.getHeight());
             BufferedImage resized = resize(source);
             write(resized);
 
@@ -64,10 +65,24 @@ public final class ImageProcessor {
         return image;
     }
 
+    private int newWidth;
+    private int newHeight;
+
+
+    private void scale(int width, int height) {
+        double ratio = Math.min(
+                (double) config.getWidth() / width,
+                (double) config.getHeight() / height
+        );
+
+        newWidth = Math.max(1, Math.min((int) Math.round(ratio * width), config.getWidth()));
+        newHeight = Math.max(1, Math.min((int) Math.round(ratio * height), config.getHeight()));
+    }
+
     private BufferedImage resize(BufferedImage source) {
         BufferedImage result = new BufferedImage(
-                config.getWidth(),
-                config.getHeight(),
+                newWidth,
+                newHeight,
                 BufferedImage.TYPE_INT_RGB
         );
 
@@ -80,7 +95,7 @@ public final class ImageProcessor {
             );
 
             graphics.drawImage(source, 0, 0,
-                    config.getWidth(), config.getHeight(), null
+                    newWidth, newHeight, null
             );
         }
         finally {
