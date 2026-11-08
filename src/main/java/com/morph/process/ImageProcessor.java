@@ -47,6 +47,16 @@ public final class ImageProcessor {
     }
 
     private BufferedImage read() throws IOException {
+        if (!input.isFile())
+            throw new IllegalArgumentException(
+                    "Input file does not exist."
+            );
+
+        if (!input.canRead())
+            throw new IllegalArgumentException(
+                    "Input file is not readable."
+            );
+
         BufferedImage image = ImageIO.read(input);
 
         if (image == null)
