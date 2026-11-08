@@ -1,6 +1,6 @@
 package com.morph;
 
-public class Main {
+public class Morph {
     public static void main(String[] args) {
 
     }
