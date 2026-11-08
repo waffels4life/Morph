@@ -16,7 +16,8 @@ public final class ImageProcessor {
     private final int width;
     private final int height;
 
-    public ImageProcessor(File input, File output, int width, int height) {
+    public ImageProcessor(File input, File output,
+                          int width, int height) {
         this.input = Objects.requireNonNull(input);
         this.output = Objects.requireNonNull(output);
 
