@@ -1,5 +1,6 @@
 package com.morph;
 
+import com.morph.format.ImageFormat;
 import com.morph.process.ImageProcessor;
 
 import java.io.File;
@@ -10,7 +11,8 @@ public class Morph {
                 new File("in.png"),
                 new File("out.png"),
                 600,
-                800
+                800,
+                ImageFormat.JPEG
         ).process();
     }
 }

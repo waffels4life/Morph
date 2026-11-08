@@ -1,5 +1,7 @@
 package com.morph.process;
 
+import com.morph.format.ImageFormat;
+
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -15,11 +17,16 @@ public final class ImageProcessor {
     private final File output;
     private final int width;
     private final int height;
+    private final ImageFormat format;
 
-    public ImageProcessor(File input, File output,
-                          int width, int height) {
+    public ImageProcessor(File input,
+                          File output,
+                          int width,
+                          int height,
+                          ImageFormat format) {
         this.input = Objects.requireNonNull(input);
         this.output = Objects.requireNonNull(output);
+        this.format = Objects.requireNonNull(format);
 
         if (width <= 0 || height <= 0)
             throw new IllegalArgumentException(
@@ -92,7 +99,11 @@ public final class ImageProcessor {
     }
 
     private void write(BufferedImage image) throws IOException {
-        boolean written = ImageIO.write(image, "jpg", output);
+        boolean written = ImageIO.write(
+                image,
+                format.getFormatName(),
+                output
+        );
 
         if (!written)
             throw new IllegalStateException(
