@@ -14,6 +14,11 @@ public class Process {
     public void inputFile(String pathname) {
         this.input = new File(pathname);
     }
+    public File getOutput() {
+        return output;
+    }
 
-
+    public BufferedImage getImage() {
+        return image;
+    }
 }
