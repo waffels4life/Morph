@@ -7,12 +7,12 @@ import java.io.File;
 
 public class Morph {
     public static void main(String[] args) {
-        new ImageProcessor(
-                new File("in.png"),
-                new File("out.png"),
-                600,
-                800,
-                ImageFormat.JPEG
-        ).process();
+//        new ImageProcessor(
+//                new File("in.png"),
+//                new File("out.png"),
+//                600,
+//                800,
+//                ImageFormat.JPEG
+//        ).process();
     }
 }

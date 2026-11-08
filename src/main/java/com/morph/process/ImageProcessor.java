@@ -1,6 +1,6 @@
 package com.morph.process;
 
-import com.morph.format.ImageFormat;
+import com.morph.config.ImageConfig;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -15,26 +15,16 @@ public final class ImageProcessor {
 
     private final File input;
     private final File output;
-    private final int width;
-    private final int height;
-    private final ImageFormat format;
+    private final ImageConfig config;
+    private final ImageEncoder encoder;
 
     public ImageProcessor(File input,
                           File output,
-                          int width,
-                          int height,
-                          ImageFormat format) {
+                          ImageConfig config) {
         this.input = Objects.requireNonNull(input);
         this.output = Objects.requireNonNull(output);
-        this.format = Objects.requireNonNull(format);
-
-        if (width <= 0 || height <= 0)
-            throw new IllegalArgumentException(
-                    "Invalid image dimensions."
-            );
-
-        this.width = width;
-        this.height = height;
+        this.config = Objects.requireNonNull(config);
+        this.encoder = new ImageEncoder();
     }
 
     public File process() {
@@ -76,8 +66,8 @@ public final class ImageProcessor {
 
     private BufferedImage resize(BufferedImage source) {
         BufferedImage result = new BufferedImage(
-                width,
-                height,
+                config.getWidth(),
+                config.getHeight(),
                 BufferedImage.TYPE_INT_RGB
         );
 
@@ -89,7 +79,9 @@ public final class ImageProcessor {
                     RenderingHints.VALUE_INTERPOLATION_BICUBIC
             );
 
-            graphics.drawImage(source, 0, 0, width, height, null);
+            graphics.drawImage(source, 0, 0,
+                    config.getWidth(), config.getHeight(), null
+            );
         }
         finally {
             graphics.dispose();
@@ -99,15 +91,11 @@ public final class ImageProcessor {
     }
 
     private void write(BufferedImage image) throws IOException {
-        boolean written = ImageIO.write(
+        encoder.encode(
                 image,
-                format.getFormatName(),
-                output
+                output,
+                config.getFormat(),
+                config.getQuality()
         );
-
-        if (!written)
-            throw new IllegalStateException(
-                    "No suitable image writer found."
-            );
     }
 }

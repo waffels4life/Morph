@@ -4,7 +4,7 @@ import com.morph.format.ImageFormat;
 
 import java.util.Objects;
 
-public class ImageConfig {
+public final class ImageConfig {
     private final int width;
     private final int height;
     private final ImageFormat format;
