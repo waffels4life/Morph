@@ -1,6 +1,8 @@
 package com.morph.process;
 
 import com.morph.config.ImageConfig;
+import com.morph.geometry.ImageDimensions;
+import com.morph.geometry.ImageScaler;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
@@ -17,6 +19,7 @@ public final class ImageProcessor {
     private final File output;
     private final ImageConfig config;
     private final ImageEncoder encoder;
+    private final ImageScaler scaler;
 
     public ImageProcessor(File input,
                           File output,
@@ -25,13 +28,21 @@ public final class ImageProcessor {
         this.output = Objects.requireNonNull(output);
         this.config = Objects.requireNonNull(config);
         this.encoder = new ImageEncoder();
+        this.scaler = new ImageScaler();
     }
 
     public File process() {
         try {
             BufferedImage source = read();
-            scale(source.getWidth(), source.getHeight());
-            BufferedImage resized = resize(source);
+
+            ImageDimensions dimensions = scaler.fit(
+                    source.getWidth(),
+                    source.getHeight(),
+                    config.getWidth(),
+                    config.getHeight()
+            );
+
+            BufferedImage resized = resize(source, dimensions);
             write(resized);
 
             return output;
@@ -65,24 +76,12 @@ public final class ImageProcessor {
         return image;
     }
 
-    private int newWidth;
-    private int newHeight;
+    private BufferedImage resize(BufferedImage source,
+                                 ImageDimensions dimensions) {
 
-
-    private void scale(int width, int height) {
-        double ratio = Math.min(
-                (double) config.getWidth() / width,
-                (double) config.getHeight() / height
-        );
-
-        newWidth = Math.max(1, Math.min((int) Math.round(ratio * width), config.getWidth()));
-        newHeight = Math.max(1, Math.min((int) Math.round(ratio * height), config.getHeight()));
-    }
-
-    private BufferedImage resize(BufferedImage source) {
         BufferedImage result = new BufferedImage(
-                newWidth,
-                newHeight,
+                dimensions.getWidth(),
+                dimensions.getHeight(),
                 BufferedImage.TYPE_INT_RGB
         );
 
@@ -94,8 +93,13 @@ public final class ImageProcessor {
                     RenderingHints.VALUE_INTERPOLATION_BICUBIC
             );
 
-            graphics.drawImage(source, 0, 0,
-                    newWidth, newHeight, null
+            graphics.drawImage(
+                    source,
+                    0,
+                    0,
+                    dimensions.getWidth(),
+                    dimensions.getHeight(),
+                    null
             );
         }
         finally {
