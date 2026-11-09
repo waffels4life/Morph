@@ -3,6 +3,7 @@ package com.morph.process;
 import com.morph.config.ImageConfig;
 import com.morph.geometry.ImageDimensions;
 import com.morph.geometry.ImageScaler;
+import com.morph.validation.ImageValidator;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -19,22 +20,30 @@ public final class ImageProcessor {
     private final ImageEncoder encoder;
     private final ImageScaler scaler;
     private final ImageRenderer renderer;
+    private final ImageValidator validator;
+    private final ExistingFilePolicy existingFilePolicy;
 
     public ImageProcessor(File input,
                           File output,
-                          ImageConfig config) {
+                          ImageConfig config,
+                          ExistingFilePolicy existingFilePolicy) {
 
         this.input = Objects.requireNonNull(input);
         this.output = Objects.requireNonNull(output);
         this.config = Objects.requireNonNull(config);
+        this.existingFilePolicy = Objects.requireNonNull(existingFilePolicy);
 
         this.encoder = new ImageEncoder();
         this.scaler = new ImageScaler();
         this.renderer = new ImageRenderer();
+        this.validator = new ImageValidator();
     }
 
     public File process() {
         try {
+            validator.validateInput(input);
+            validator.validateOutput(input, output, existingFilePolicy);
+
             BufferedImage source = read();
 
             ImageDimensions dimensions = scaler.fit(
@@ -49,6 +58,7 @@ public final class ImageProcessor {
                     dimensions,
                     config.getInterpolationMode()
             );
+
             write(resized);
 
             return output;
@@ -62,16 +72,6 @@ public final class ImageProcessor {
     }
 
     private BufferedImage read() throws IOException {
-        if (!input.isFile())
-            throw new IllegalArgumentException(
-                    "Input file does not exist."
-            );
-
-        if (!input.canRead())
-            throw new IllegalArgumentException(
-                    "Input file is not readable."
-            );
-
         BufferedImage image = ImageIO.read(input);
 
         if (image == null)
