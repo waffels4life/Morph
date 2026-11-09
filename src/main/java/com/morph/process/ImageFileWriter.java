@@ -34,6 +34,8 @@ public final class ImageFileWriter {
                 ".tmp"
         );
 
+        IOException failure = null;
+
         try {
             encoder.encode(
                     image,
@@ -43,8 +45,11 @@ public final class ImageFileWriter {
             );
 
             switch (policy) {
-                case FAIL_IF_EXISTS -> Files.createLink(outputPath, temp);
-                case REPLACE_EXISTING -> Files.move(
+                case FAIL_IF_EXISTS ->
+                        Files.createLink(outputPath, temp);
+
+                case REPLACE_EXISTING ->
+                        Files.move(
                                 temp,
                                 outputPath,
                                 StandardCopyOption.ATOMIC_MOVE
@@ -52,8 +57,19 @@ public final class ImageFileWriter {
             }
 
         }
+        catch (IOException e) {
+            failure = e;
+            throw e;
+
+        }
         finally {
-            Files.deleteIfExists(temp);
+            try {
+                Files.deleteIfExists(temp);
+            }
+            catch (IOException cleanupException) {
+                if (failure != null) failure.addSuppressed(cleanupException);
+                else throw cleanupException;
+            }
         }
     }
 }
