@@ -34,7 +34,7 @@ public final class ImageFileWriter {
                 ".tmp"
         );
 
-        IOException failure = null;
+        Throwable failure = null;
 
         try {
             encoder.encode(
@@ -57,10 +57,9 @@ public final class ImageFileWriter {
             }
 
         }
-        catch (IOException e) {
+        catch (IOException | RuntimeException | Error e) {
             failure = e;
             throw e;
-
         }
         finally {
             try {
