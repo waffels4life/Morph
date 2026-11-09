@@ -229,4 +229,55 @@ class ImageProcessorTest {
         assertEquals(450, decoded.getHeight());
     }
 
+
+    @Test
+    void shouldPreserveTransparencyWhenProcessingPng() throws IOException {
+
+        // Arrange
+        File input = tempDir.resolve("transparent.png").toFile();
+        File output = tempDir.resolve("output.png").toFile();
+
+        BufferedImage source = new BufferedImage(
+                100,
+                100,
+                BufferedImage.TYPE_INT_ARGB
+        );
+
+        source.setRGB(
+                50,
+                50,
+                new java.awt.Color(255, 0, 0, 128).getRGB()
+        );
+
+        ImageIO.write(source, "png", input);
+
+        ImageConfig config = new ImageConfig(
+                200,
+                200,
+                ImageFormat.PNG,
+                1.0f,
+                InterpolationMode.BICUBIC
+        );
+
+        ImageProcessor processor = new ImageProcessor(
+                input,
+                output,
+                config,
+                ExistingFilePolicy.FAIL_IF_EXISTS
+        );
+
+        // Act
+        processor.process();
+
+        BufferedImage result = ImageIO.read(output);
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(result.getColorModel().hasAlpha());
+
+        int alpha = (result.getRGB(100, 100) >>> 24) & 0xFF;
+
+        assertTrue(alpha > 0 && alpha < 255);
+    }
+
 }
