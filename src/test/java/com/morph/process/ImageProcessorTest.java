@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -91,6 +92,40 @@ class ImageProcessorTest {
         // Act & Assert
         assertThrows(
                 java.io.UncheckedIOException.class,
+                processor::process
+        );
+
+        assertFalse(output.exists());
+    }
+
+
+    @Test
+    void shouldThrowExceptionWhenInputFormatIsUnsupported() throws IOException {
+
+        // Arrange
+        File input = tempDir.resolve("invalid.png").toFile();
+        File output = tempDir.resolve("output.png").toFile();
+
+        Files.writeString(input.toPath(), "This is not an image.");
+
+        ImageConfig config = new ImageConfig(
+                800,
+                600,
+                ImageFormat.PNG,
+                1.0f,
+                InterpolationMode.BICUBIC
+        );
+
+        ImageProcessor processor = new ImageProcessor(
+                input,
+                output,
+                config,
+                ExistingFilePolicy.FAIL_IF_EXISTS
+        );
+
+        // Act & Assert
+        assertThrows(
+                IllegalArgumentException.class,
                 processor::process
         );
 
