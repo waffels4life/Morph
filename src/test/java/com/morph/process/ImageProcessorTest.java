@@ -1,4 +1,3 @@
-
 package com.morph.process;
 
 import com.morph.config.ImageConfig;
@@ -6,6 +5,8 @@ import com.morph.config.InterpolationMode;
 import com.morph.format.ImageFormat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -176,4 +177,56 @@ class ImageProcessorTest {
                 Files.readAllBytes(output.toPath())
         );
     }
+
+
+    @ParameterizedTest
+    @EnumSource(ImageFormat.class)
+    void shouldSupportAllImageFormats(ImageFormat format) throws IOException {
+
+        // Arrange
+        File input = tempDir.resolve("input.png").toFile();
+
+        File output = tempDir.resolve(
+                "output." + format.getExtension()
+        ).toFile();
+
+        BufferedImage source = new BufferedImage(
+                1920,
+                1080,
+                BufferedImage.TYPE_INT_RGB
+        );
+
+        ImageIO.write(source, "png", input);
+
+        float quality = format == ImageFormat.JPEG ? 0.8f : 1.0f;
+
+        ImageConfig config = new ImageConfig(
+                800,
+                600,
+                format,
+                quality,
+                InterpolationMode.BICUBIC
+        );
+
+        ImageProcessor processor = new ImageProcessor(
+                input,
+                output,
+                config,
+                ExistingFilePolicy.FAIL_IF_EXISTS
+        );
+
+        // Act
+        File result = processor.process();
+
+        // Assert
+        assertNotNull(result);
+        assertTrue(output.exists());
+
+        BufferedImage decoded = ImageIO.read(output);
+
+        assertNotNull(decoded);
+        assertEquals(800, decoded.getWidth());
+        assertEquals(450, decoded.getHeight());
+    }
+
 }
