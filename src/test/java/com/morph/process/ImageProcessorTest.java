@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -132,4 +133,47 @@ class ImageProcessorTest {
         assertFalse(output.exists());
     }
 
+
+    @Test
+    void shouldNotOverwriteExistingOutputFile() throws IOException {
+
+        // Arrange
+        File input = tempDir.resolve("input.png").toFile();
+        File output = tempDir.resolve("output.png").toFile();
+
+        BufferedImage source = new BufferedImage(
+                1920, 1080, BufferedImage.TYPE_INT_RGB
+        );
+
+        ImageIO.write(source, "png", input);
+
+        byte[] originalContent = "Existing file".getBytes();
+        Files.write(output.toPath(), originalContent);
+
+        ImageConfig config = new ImageConfig(
+                800,
+                600,
+                ImageFormat.PNG,
+                1.0f,
+                InterpolationMode.BICUBIC
+        );
+
+        ImageProcessor processor = new ImageProcessor(
+                input,
+                output,
+                config,
+                ExistingFilePolicy.FAIL_IF_EXISTS
+        );
+
+        // Act & Assert
+        assertThrows(
+                UncheckedIOException.class,
+                processor::process
+        );
+
+        assertArrayEquals(
+                originalContent,
+                Files.readAllBytes(output.toPath())
+        );
+    }
 }
