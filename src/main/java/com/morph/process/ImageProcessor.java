@@ -40,11 +40,16 @@ public final class ImageProcessor {
     }
 
     public File process() {
+
+        BufferedImage source = null;
+        BufferedImage resized = null;
+        Throwable failure = null;
+
         try {
             validator.validateInput(input);
             validator.validateOutput(input, output, existingFilePolicy);
 
-            BufferedImage source = read();
+            source = read();
 
             ImageDimensions dimensions = scaler.fit(
                     source.getWidth(),
@@ -53,7 +58,7 @@ public final class ImageProcessor {
                     config.getHeight()
             );
 
-            BufferedImage resized = renderer.resize(
+            resized = renderer.resize(
                     source,
                     dimensions,
                     config.getInterpolationMode()
@@ -64,12 +69,41 @@ public final class ImageProcessor {
             return output;
         }
         catch (IOException e) {
+            failure = e;
             throw new UncheckedIOException(
                     "Image processing failed.",
                     e
             );
         }
+        catch (RuntimeException | Error e) {
+            failure = e;
+            throw e;
+        }
+        finally {
+            RuntimeException cleanupFailure = null;
+
+            try {
+                if (source != null) source.flush();
+            }
+            catch (RuntimeException e) {
+                cleanupFailure = e;
+            }
+
+            try {
+                if (resized != null) resized.flush();
+            }
+            catch (RuntimeException e) {
+                if (cleanupFailure == null) cleanupFailure = e;
+                else cleanupFailure.addSuppressed(e);
+            }
+
+            if (cleanupFailure != null) {
+                if (failure != null) failure.addSuppressed(cleanupFailure);
+                else throw cleanupFailure;
+            }
+        }
     }
+
 
     private BufferedImage read() throws IOException {
         BufferedImage image = ImageIO.read(input);
