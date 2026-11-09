@@ -1,11 +1,11 @@
 package com.morph.process;
 
 import com.morph.config.ImageConfig;
+import com.morph.config.ImageLimits;
 import com.morph.geometry.ImageDimensions;
 import com.morph.geometry.ImageScaler;
 import com.morph.validation.ImageValidator;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +22,7 @@ public final class ImageProcessor {
     private final ImageValidator validator;
     private final ExistingFilePolicy existingFilePolicy;
     private final ImageFileWriter fileWriter;
+    private final ImageDecoder decoder;
 
     public ImageProcessor(File input,
                           File output,
@@ -37,6 +38,10 @@ public final class ImageProcessor {
         this.renderer = new ImageRenderer();
         this.validator = new ImageValidator();
         this.fileWriter = new ImageFileWriter();
+        this.decoder = new ImageDecoder(
+                ImageLimits.defaults(),
+                validator
+        );
     }
 
     public File process() {
@@ -49,7 +54,7 @@ public final class ImageProcessor {
             validator.validateInput(input);
             validator.validateOutput(input, output, existingFilePolicy);
 
-            source = read();
+            source = decoder.decode(input);
 
             ImageDimensions dimensions = scaler.fit(
                     source.getWidth(),
@@ -64,7 +69,13 @@ public final class ImageProcessor {
                     config.getInterpolationMode()
             );
 
-            write(resized);
+            fileWriter.write(
+                    resized,
+                    output,
+                    config.getFormat(),
+                    config.getQuality(),
+                    existingFilePolicy
+            );
 
             return output;
         }
@@ -102,27 +113,5 @@ public final class ImageProcessor {
                 else throw cleanupFailure;
             }
         }
-    }
-
-
-    private BufferedImage read() throws IOException {
-        BufferedImage image = ImageIO.read(input);
-
-        if (image == null)
-            throw new IllegalArgumentException(
-                    "Unsupported image format."
-            );
-
-        return image;
-    }
-
-    private void write(BufferedImage image) throws IOException {
-        fileWriter.write(
-                image,
-                output,
-                config.getFormat(),
-                config.getQuality(),
-                existingFilePolicy
-        );
     }
 }
