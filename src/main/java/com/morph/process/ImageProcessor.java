@@ -5,8 +5,6 @@ import com.morph.geometry.ImageDimensions;
 import com.morph.geometry.ImageScaler;
 
 import javax.imageio.ImageIO;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -20,15 +18,19 @@ public final class ImageProcessor {
     private final ImageConfig config;
     private final ImageEncoder encoder;
     private final ImageScaler scaler;
+    private final ImageRenderer renderer;
 
     public ImageProcessor(File input,
                           File output,
                           ImageConfig config) {
+
         this.input = Objects.requireNonNull(input);
         this.output = Objects.requireNonNull(output);
         this.config = Objects.requireNonNull(config);
+
         this.encoder = new ImageEncoder();
         this.scaler = new ImageScaler();
+        this.renderer = new ImageRenderer();
     }
 
     public File process() {
@@ -42,7 +44,11 @@ public final class ImageProcessor {
                     config.getHeight()
             );
 
-            BufferedImage resized = resize(source, dimensions);
+            BufferedImage resized = renderer.resize(
+                    source,
+                    dimensions,
+                    config.getInterpolationMode()
+            );
             write(resized);
 
             return output;
@@ -74,50 +80,6 @@ public final class ImageProcessor {
             );
 
         return image;
-    }
-
-    private BufferedImage resize(BufferedImage source,
-                                 ImageDimensions dimensions) {
-
-        BufferedImage result = new BufferedImage(
-                dimensions.getWidth(),
-                dimensions.getHeight(),
-                BufferedImage.TYPE_INT_RGB
-        );
-
-        Graphics2D graphics = result.createGraphics();
-
-        try {
-            graphics.setRenderingHint(
-                    RenderingHints.KEY_INTERPOLATION,
-                    getInterpolationHint()
-            );
-
-            graphics.drawImage(
-                    source,
-                    0,
-                    0,
-                    dimensions.getWidth(),
-                    dimensions.getHeight(),
-                    null
-            );
-        }
-        finally {
-            graphics.dispose();
-        }
-
-        return result;
-    }
-
-    private Object getInterpolationHint() {
-        return switch (config.getInterpolationMode()) {
-            case NEAREST_NEIGHBOR ->
-                    RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
-            case BILINEAR ->
-                    RenderingHints.VALUE_INTERPOLATION_BILINEAR;
-            case BICUBIC ->
-                    RenderingHints.VALUE_INTERPOLATION_BICUBIC;
-        };
     }
 
     private void write(BufferedImage image) throws IOException {
