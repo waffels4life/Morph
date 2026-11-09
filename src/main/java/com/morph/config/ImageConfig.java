@@ -9,21 +9,31 @@ public final class ImageConfig {
     private final int height;
     private final ImageFormat format;
     private final float quality;
+    private final InterpolationMode interpolationMode;
 
     public ImageConfig(int width,
                        int height,
                        ImageFormat format,
-                       float quality) {
+                       float quality,
+                       InterpolationMode interpolationMode) {
 
-        validate(width, height, format, quality);
+
+        validate(width, height, format, quality, interpolationMode);
         this.width = width;
         this.height = height;
         this.format = format;
         this.quality = quality;
+        this.interpolationMode = interpolationMode;
     }
 
-    private void validate(int width, int height, ImageFormat format, float quality) {
+    private void validate(int width,
+                          int height,
+                          ImageFormat format,
+                          float quality,
+                          InterpolationMode interpolationMode) {
+
         Objects.requireNonNull(format);
+        Objects.requireNonNull(interpolationMode);
 
         if (width <= 0 || height <= 0)
             throw new IllegalArgumentException(
@@ -58,5 +68,9 @@ public final class ImageConfig {
 
     public float getQuality() {
         return quality;
+    }
+
+    public InterpolationMode getInterpolationMode() {
+        return interpolationMode;
     }
 }

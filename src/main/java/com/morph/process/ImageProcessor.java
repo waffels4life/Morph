@@ -90,7 +90,7 @@ public final class ImageProcessor {
         try {
             graphics.setRenderingHint(
                     RenderingHints.KEY_INTERPOLATION,
-                    RenderingHints.VALUE_INTERPOLATION_BICUBIC
+                    getInterpolationHint()
             );
 
             graphics.drawImage(
@@ -107,6 +107,17 @@ public final class ImageProcessor {
         }
 
         return result;
+    }
+
+    private Object getInterpolationHint() {
+        return switch (config.getInterpolationMode()) {
+            case NEAREST_NEIGHBOR ->
+                    RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR;
+            case BILINEAR ->
+                    RenderingHints.VALUE_INTERPOLATION_BILINEAR;
+            case BICUBIC ->
+                    RenderingHints.VALUE_INTERPOLATION_BICUBIC;
+        };
     }
 
     private void write(BufferedImage image) throws IOException {
