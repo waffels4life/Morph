@@ -1,4 +1,4 @@
-package test.com.morph.process;
+package com.morph.process;
 
 import com.morph.config.InterpolationMode;
 import com.morph.geometry.ImageDimensions;
