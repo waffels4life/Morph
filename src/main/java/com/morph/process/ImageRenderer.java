@@ -20,7 +20,9 @@ public final class ImageRenderer {
         BufferedImage result = new BufferedImage(
                 dimensions.getWidth(),
                 dimensions.getHeight(),
-                BufferedImage.TYPE_INT_RGB
+                source.getColorModel().hasAlpha()
+                        ? BufferedImage.TYPE_INT_ARGB
+                        : BufferedImage.TYPE_INT_RGB
         );
 
         Graphics2D graphics = result.createGraphics();
