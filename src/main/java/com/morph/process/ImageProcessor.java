@@ -17,11 +17,11 @@ public final class ImageProcessor {
     private final File input;
     private final File output;
     private final ImageConfig config;
-    private final ImageEncoder encoder;
     private final ImageScaler scaler;
     private final ImageRenderer renderer;
     private final ImageValidator validator;
     private final ExistingFilePolicy existingFilePolicy;
+    private final ImageFileWriter fileWriter;
 
     public ImageProcessor(File input,
                           File output,
@@ -33,10 +33,10 @@ public final class ImageProcessor {
         this.config = Objects.requireNonNull(config);
         this.existingFilePolicy = Objects.requireNonNull(existingFilePolicy);
 
-        this.encoder = new ImageEncoder();
         this.scaler = new ImageScaler();
         this.renderer = new ImageRenderer();
         this.validator = new ImageValidator();
+        this.fileWriter = new ImageFileWriter();
     }
 
     public File process() {
@@ -83,11 +83,12 @@ public final class ImageProcessor {
     }
 
     private void write(BufferedImage image) throws IOException {
-        encoder.encode(
+        fileWriter.write(
                 image,
                 output,
                 config.getFormat(),
-                config.getQuality()
+                config.getQuality(),
+                existingFilePolicy
         );
     }
 }
