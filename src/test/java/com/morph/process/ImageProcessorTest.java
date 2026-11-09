@@ -64,4 +64,37 @@ class ImageProcessorTest {
         assertEquals(800, processed.getWidth());
         assertEquals(450, processed.getHeight());
     }
+
+
+    @Test
+    void shouldThrowExceptionWhenInputDoesNotExist() {
+
+        // Arrange
+        File input = tempDir.resolve("missing.png").toFile();
+        File output = tempDir.resolve("output.png").toFile();
+
+        ImageConfig config = new ImageConfig(
+                800,
+                600,
+                ImageFormat.PNG,
+                1.0f,
+                InterpolationMode.BICUBIC
+        );
+
+        ImageProcessor processor = new ImageProcessor(
+                input,
+                output,
+                config,
+                ExistingFilePolicy.FAIL_IF_EXISTS
+        );
+
+        // Act & Assert
+        assertThrows(
+                java.io.UncheckedIOException.class,
+                processor::process
+        );
+
+        assertFalse(output.exists());
+    }
+
 }
