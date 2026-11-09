@@ -3,6 +3,7 @@ package com.morph.process;
 import com.morph.config.ImageConfig;
 import com.morph.config.InterpolationMode;
 import com.morph.format.ImageFormat;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -278,6 +279,74 @@ class ImageProcessorTest {
         int alpha = (result.getRGB(100, 100) >>> 24) & 0xFF;
 
         assertTrue(alpha > 0 && alpha < 255);
+    }
+
+
+    @Test
+    void shouldApplyJpegCompressionQuality() throws IOException {
+
+        // Arrange
+        File input = tempDir.resolve("input.png").toFile();
+
+        File lowQualityOutput = tempDir.resolve("low.jpg").toFile();
+        File highQualityOutput = tempDir.resolve("high.jpg").toFile();
+
+        BufferedImage source = getBufferedImage();
+
+        ImageIO.write(source, "png", input);
+
+        ImageConfig lowQualityConfig = new ImageConfig(
+                1000, 1000, ImageFormat.JPEG, 0.2f,
+                InterpolationMode.BICUBIC
+        );
+
+        ImageConfig highQualityConfig = new ImageConfig(
+                1000, 1000, ImageFormat.JPEG, 1.0f,
+                InterpolationMode.BICUBIC
+        );
+
+        // Act
+        new ImageProcessor(
+                input, lowQualityOutput, lowQualityConfig,
+                ExistingFilePolicy.FAIL_IF_EXISTS
+        ).process();
+
+        new ImageProcessor(
+                input, highQualityOutput, highQualityConfig,
+                ExistingFilePolicy.FAIL_IF_EXISTS
+        ).process();
+
+        // Assert
+        assertTrue(lowQualityOutput.exists());
+        assertTrue(highQualityOutput.exists());
+
+        assertTrue(
+                lowQualityOutput.length() < highQualityOutput.length(),
+                "Low-quality JPEG should generally be smaller."
+        );
+    }
+
+    private static @NonNull BufferedImage getBufferedImage() {
+        BufferedImage source = new BufferedImage(
+                1000,
+                1000,
+                BufferedImage.TYPE_INT_RGB
+        );
+
+        // Create a detailed image with varying pixel values.
+        for (int y = 0; y < source.getHeight(); y++) {
+            for (int x = 0; x < source.getWidth(); x++) {
+                int red = (x * 255) / source.getWidth();
+                int green = (y * 255) / source.getHeight();
+                int blue = (x * y) % 256;
+
+                source.setRGB(
+                        x, y,
+                        new java.awt.Color(red, green, blue).getRGB()
+                );
+            }
+        }
+        return source;
     }
 
 }
