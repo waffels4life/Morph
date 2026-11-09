@@ -1,8 +1,10 @@
 package com.morph.process;
 
 import com.morph.config.ImageConfig;
+import com.morph.config.ImageLimits;
 import com.morph.config.InterpolationMode;
 import com.morph.format.ImageFormat;
+import com.morph.validation.ImageValidator;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -349,4 +351,24 @@ class ImageProcessorTest {
         return source;
     }
 
+    @Test
+    void shouldRejectImageExceedingPixelLimit() throws IOException {
+        File input = tempDir.resolve("large.png").toFile();
+
+        BufferedImage image = new BufferedImage(
+                200, 200, BufferedImage.TYPE_INT_RGB
+        );
+
+        ImageIO.write(image, "png", input);
+
+        ImageDecoder decoder = new ImageDecoder(
+                new ImageLimits(500, 500, 30_000L),
+                new ImageValidator()
+        );
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> decoder.decode(input)
+        );
+    }
 }
