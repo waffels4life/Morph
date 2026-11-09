@@ -27,7 +27,8 @@ public final class ImageProcessor {
     public ImageProcessor(File input,
                           File output,
                           ImageConfig config,
-                          ExistingFilePolicy existingFilePolicy) {
+                          ExistingFilePolicy existingFilePolicy,
+                          ImageLimits limits) {
 
         this.input = Objects.requireNonNull(input);
         this.output = Objects.requireNonNull(output);
@@ -39,9 +40,17 @@ public final class ImageProcessor {
         this.validator = new ImageValidator();
         this.fileWriter = new ImageFileWriter();
         this.decoder = new ImageDecoder(
-                ImageLimits.defaults(),
+                Objects.requireNonNull(limits),
                 validator
         );
+    }
+
+    public ImageProcessor(File input,
+                          File output,
+                          ImageConfig config,
+                          ExistingFilePolicy existingFilePolicy) {
+
+        this(input, output, config, existingFilePolicy, ImageLimits.defaults());
     }
 
     public File process() {
