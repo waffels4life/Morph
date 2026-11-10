@@ -1,7 +1,7 @@
 package com.morph.validation;
 
 import com.morph.config.ImageLimits;
-import com.morph.process.ExistingFilePolicy;
+import com.morph.io.ExistingFilePolicy;
 
 import java.io.File;
 import java.io.FileNotFoundException;

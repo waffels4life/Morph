@@ -1,4 +1,4 @@
-package com.morph.process;
+package com.morph.codec;
 
 import com.morph.format.ImageFormat;
 

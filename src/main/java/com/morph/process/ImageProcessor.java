@@ -1,9 +1,12 @@
 package com.morph.process;
 
+import com.morph.codec.ImageDecoder;
 import com.morph.config.ImageConfig;
 import com.morph.config.ImageLimits;
 import com.morph.geometry.ImageDimensions;
 import com.morph.geometry.ImageScaler;
+import com.morph.io.ExistingFilePolicy;
+import com.morph.io.ImageFileWriter;
 import com.morph.validation.ImageValidator;
 
 import java.awt.image.BufferedImage;

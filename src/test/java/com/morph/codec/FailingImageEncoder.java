@@ -1,4 +1,4 @@
-package com.morph.process;
+package com.morph.codec;
 
 import com.morph.format.ImageFormat;
 
@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-final class FailingImageEncoder implements ImageEncoding {
+public final class FailingImageEncoder implements ImageEncoding {
 
     @Override
     public void encode(BufferedImage image,

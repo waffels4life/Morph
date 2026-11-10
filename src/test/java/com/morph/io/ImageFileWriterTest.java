@@ -1,5 +1,6 @@
-package com.morph.process;
+package com.morph.io;
 
+import com.morph.codec.FailingImageEncoder;
 import com.morph.format.ImageFormat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
