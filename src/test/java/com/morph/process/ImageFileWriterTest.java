@@ -12,6 +12,7 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -202,5 +203,75 @@ public class ImageFileWriterTest {
         assertEquals(100, decoded.getHeight());
 
         decoded.flush();
+    }
+
+    @Test
+    void shouldCleanupTemporaryFileWhenEncodingFails() throws IOException {
+
+        FailingImageEncoder encoder = new FailingImageEncoder();
+
+        ImageFileWriter writer = new ImageFileWriter(
+                AtomicMovePolicy.REQUIRE_ATOMIC,
+                new NioFileMover(),
+                encoder
+        );
+
+        BufferedImage image = new BufferedImage(
+                100, 100, BufferedImage.TYPE_INT_RGB
+        );
+
+        Path output = tempDir.resolve("output.png");
+
+        assertThrows(
+                IOException.class,
+                () -> writer.write(
+                        image,
+                        output.toFile(),
+                        ImageFormat.PNG,
+                        1.0f,
+                        ExistingFilePolicy.REPLACE_EXISTING
+                )
+        );
+
+        assertFalse(Files.exists(output));
+
+        try (var files = Files.list(tempDir)) {
+            assertEquals(0, files.count());
+        }
+    }
+
+    @Test
+    void shouldPreserveExistingFileWhenEncodingFails() throws IOException {
+
+        ImageFileWriter writer = new ImageFileWriter(
+                AtomicMovePolicy.REQUIRE_ATOMIC,
+                new NioFileMover(),
+                new FailingImageEncoder()
+        );
+
+        BufferedImage image = new BufferedImage(
+                100, 100, BufferedImage.TYPE_INT_RGB
+        );
+
+        Path output = tempDir.resolve("existing.png");
+
+        byte[] originalContent = "Original content".getBytes();
+        Files.write(output, originalContent);
+
+        assertThrows(
+                IOException.class,
+                () -> writer.write(
+                        image,
+                        output.toFile(),
+                        ImageFormat.PNG,
+                        1.0f,
+                        ExistingFilePolicy.REPLACE_EXISTING
+                )
+        );
+
+        assertArrayEquals(
+                originalContent,
+                Files.readAllBytes(output)
+        );
     }
 }
