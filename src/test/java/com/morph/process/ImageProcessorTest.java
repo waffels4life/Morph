@@ -1,11 +1,13 @@
 package com.morph.process;
 
+import com.morph.codec.ImageDecoder;
 import com.morph.config.ImageConfig;
 import com.morph.config.InterpolationMode;
 import com.morph.exception.InvalidImageException;
 import com.morph.exception.MorphIOException;
 import com.morph.format.ImageFormat;
 import com.morph.io.ExistingFilePolicy;
+import com.morph.io.ImageFileWriter;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -350,4 +352,48 @@ class ImageProcessorTest {
         }
         return source;
     }
+
+
+    @Test
+    void shouldProcessImageUsingInjectedDecoder() throws IOException {
+        File input = tempDir.resolve("input.fake").toFile();
+        File output = tempDir.resolve("output.png").toFile();
+
+        Files.createFile(input.toPath());
+
+        BufferedImage source = new BufferedImage(
+                200, 100, BufferedImage.TYPE_INT_RGB
+        );
+
+        ImageDecoder decoder = new FakeImageDecoder(source);
+
+        ImageConfig config = new ImageConfig(
+                100,
+                100,
+                ImageFormat.PNG,
+                1.0f,
+                InterpolationMode.BICUBIC
+        );
+
+        ImageProcessor processor = new ImageProcessor(
+                input,
+                output,
+                config,
+                ExistingFilePolicy.FAIL_IF_EXISTS,
+                decoder,
+                new ImageRenderer(),
+                new ImageFileWriter()
+        );
+
+        processor.process();
+
+        BufferedImage result = ImageIO.read(output);
+
+        assertNotNull(result);
+        assertEquals(100, result.getWidth());
+        assertEquals(50, result.getHeight());
+
+        result.flush();
+    }
+
 }

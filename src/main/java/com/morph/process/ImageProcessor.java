@@ -55,7 +55,7 @@ public final class ImageProcessor {
             File output,
             ImageConfig config,
             ExistingFilePolicy existingFilePolicy,
-            ImageIoDecoder decoder,
+            ImageDecoder decoder,
             ImageRenderer renderer,
             ImageFileWriter fileWriter
     ) {
