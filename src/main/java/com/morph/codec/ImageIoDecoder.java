@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Objects;
 
-public final class ImageIoDecoder {
+public final class ImageIoDecoder implements ImageDecoder {
 
     private final ImageLimits limits;
     private final ImageValidator validator;
@@ -23,7 +23,7 @@ public final class ImageIoDecoder {
         this.validator = Objects.requireNonNull(validator);
     }
 
-    public BufferedImage decode(File input) throws IOException {
+    @Override public BufferedImage decode(File input) throws IOException {
         Objects.requireNonNull(input, "Input file cannot be null.");
 
         ImageInputStream imageInput = ImageIO.createImageInputStream(input);

@@ -1,5 +1,6 @@
 package com.morph.process;
 
+import com.morph.codec.ImageDecoder;
 import com.morph.codec.ImageIoDecoder;
 import com.morph.config.ImageConfig;
 import com.morph.config.ImageLimits;
@@ -25,7 +26,7 @@ public final class ImageProcessor {
     private final ImageValidator validator;
     private final ExistingFilePolicy existingFilePolicy;
     private final ImageFileWriter fileWriter;
-    private final ImageIoDecoder decoder;
+    private final ImageDecoder decoder;
 
     public ImageProcessor(
             File input,
