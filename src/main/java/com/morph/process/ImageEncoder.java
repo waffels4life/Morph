@@ -13,9 +13,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Objects;
 
-public final class ImageEncoder {
+public final class ImageEncoder implements ImageEncoding {
 
-    public void encode(BufferedImage image,
+    @Override public void encode(BufferedImage image,
                        File output,
                        ImageFormat format,
                        float quality) throws IOException {
