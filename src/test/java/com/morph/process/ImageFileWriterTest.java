@@ -4,13 +4,18 @@ import com.morph.format.ImageFormat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -131,5 +136,71 @@ public class ImageFileWriterTest {
 
         assertFalse(mover.wasNormalMoveCalled());
         assertFalse(Files.exists(output));
+    }
+
+    @Test
+    void shouldNotOverwriteExistingFileWhenPolicyIsFailIfExists()
+            throws IOException {
+
+        ImageFileWriter writer = new ImageFileWriter();
+
+        BufferedImage image = new BufferedImage(
+                100, 100, BufferedImage.TYPE_INT_RGB
+        );
+
+        Path output = tempDir.resolve("existing.png");
+
+        String originalContent = "Do not overwrite me.";
+        Files.writeString(output, originalContent);
+
+        assertThrows(
+                FileAlreadyExistsException.class,
+                () -> writer.write(
+                        image,
+                        output.toFile(),
+                        ImageFormat.PNG,
+                        1.0f,
+                        ExistingFilePolicy.FAIL_IF_EXISTS
+                )
+        );
+
+        assertEquals(
+                originalContent,
+                Files.readString(output)
+        );
+    }
+
+    @Test
+    void shouldReplaceExistingFileWhenPolicyIsReplaceExisting()
+            throws IOException {
+
+        ImageFileWriter writer = new ImageFileWriter();
+
+        BufferedImage image = new BufferedImage(
+                100, 100, BufferedImage.TYPE_INT_RGB
+        );
+
+        Path output = tempDir.resolve("existing.png");
+
+        Files.writeString(output, "Old content");
+
+        writer.write(
+                image,
+                output.toFile(),
+                ImageFormat.PNG,
+                1.0f,
+                ExistingFilePolicy.REPLACE_EXISTING
+        );
+
+        assertTrue(Files.exists(output));
+        assertTrue(Files.size(output) > 0);
+
+        BufferedImage decoded = ImageIO.read(output.toFile());
+
+        assertNotNull(decoded);
+        assertEquals(100, decoded.getWidth());
+        assertEquals(100, decoded.getHeight());
+
+        decoded.flush();
     }
 }
