@@ -82,4 +82,54 @@ public class ImageFileWriterTest {
         assertTrue(mover.wasNormalMoveCalled());
         assertTrue(Files.exists(output));
     }
+
+    final class FailingFileMover implements FileMover {
+
+        private boolean normalMoveCalled;
+
+        @Override public void moveAtomically(Path source, Path target)
+                throws IOException {
+            throw new IOException("Simulated disk failure.");
+        }
+
+        @Override public void moveNormally(Path source, Path target)
+                throws IOException {
+            normalMoveCalled = true;
+        }
+
+        boolean wasNormalMoveCalled() {
+            return normalMoveCalled;
+        }
+    }
+
+    @Test
+    void shouldNotFallbackOnOtherIOException() throws IOException {
+
+        FailingFileMover mover = new FailingFileMover();
+
+        ImageFileWriter writer = new ImageFileWriter(
+                AtomicMovePolicy.ALLOW_NON_ATOMIC_FALLBACK,
+                mover
+        );
+
+        BufferedImage image = new BufferedImage(
+                100, 100, BufferedImage.TYPE_INT_RGB
+        );
+
+        Path output = tempDir.resolve("output.png");
+
+        assertThrows(
+                IOException.class,
+                () -> writer.write(
+                        image,
+                        output.toFile(),
+                        ImageFormat.PNG,
+                        1.0f,
+                        ExistingFilePolicy.REPLACE_EXISTING
+                )
+        );
+
+        assertFalse(mover.wasNormalMoveCalled());
+        assertFalse(Files.exists(output));
+    }
 }
