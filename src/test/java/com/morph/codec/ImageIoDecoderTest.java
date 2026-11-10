@@ -15,7 +15,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ImageDecoderTest {
+class ImageIoDecoderTest {
 
     @TempDir
     Path tempDir;
@@ -30,7 +30,7 @@ class ImageDecoderTest {
 
         ImageIO.write(source, "png", input);
 
-        ImageDecoder decoder = new ImageDecoder(
+        ImageIoDecoder decoder = new ImageIoDecoder(
                 ImageLimits.defaults(),
                 new ImageValidator()
         );
@@ -46,7 +46,7 @@ class ImageDecoderTest {
 
     @Test
     void shouldThrowExceptionWhenInputIsNull() {
-        ImageDecoder decoder = new ImageDecoder(
+        ImageIoDecoder decoder = new ImageIoDecoder(
                 ImageLimits.defaults(),
                 new ImageValidator()
         );
@@ -61,7 +61,7 @@ class ImageDecoderTest {
     void shouldThrowExceptionWhenInputDoesNotExist() {
         File input = tempDir.resolve("missing.png").toFile();
 
-        ImageDecoder decoder = new ImageDecoder(
+        ImageIoDecoder decoder = new ImageIoDecoder(
                 ImageLimits.defaults(),
                 new ImageValidator()
         );
@@ -78,7 +78,7 @@ class ImageDecoderTest {
 
         Files.writeString(input.toPath(), "This is not an image.");
 
-        ImageDecoder decoder = new ImageDecoder(
+        ImageIoDecoder decoder = new ImageIoDecoder(
                 ImageLimits.defaults(),
                 new ImageValidator()
         );
@@ -99,7 +99,7 @@ class ImageDecoderTest {
 
         ImageIO.write(image, "png", input);
 
-        ImageDecoder decoder = new ImageDecoder(
+        ImageIoDecoder decoder = new ImageIoDecoder(
                 new ImageLimits(500, 500, 30_000L),
                 new ImageValidator()
         );

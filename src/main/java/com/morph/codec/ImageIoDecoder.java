@@ -13,12 +13,12 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Objects;
 
-public final class ImageDecoder {
+public final class ImageIoDecoder {
 
     private final ImageLimits limits;
     private final ImageValidator validator;
 
-    public ImageDecoder(ImageLimits limits, ImageValidator validator) {
+    public ImageIoDecoder(ImageLimits limits, ImageValidator validator) {
         this.limits = Objects.requireNonNull(limits);
         this.validator = Objects.requireNonNull(validator);
     }

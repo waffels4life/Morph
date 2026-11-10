@@ -1,6 +1,6 @@
 package com.morph.process;
 
-import com.morph.codec.ImageDecoder;
+import com.morph.codec.ImageIoDecoder;
 import com.morph.config.ImageConfig;
 import com.morph.config.ImageLimits;
 import com.morph.exception.MorphIOException;
@@ -25,7 +25,7 @@ public final class ImageProcessor {
     private final ImageValidator validator;
     private final ExistingFilePolicy existingFilePolicy;
     private final ImageFileWriter fileWriter;
-    private final ImageDecoder decoder;
+    private final ImageIoDecoder decoder;
 
     public ImageProcessor(
             File input,
@@ -39,7 +39,7 @@ public final class ImageProcessor {
                 output,
                 config,
                 existingFilePolicy,
-                new ImageDecoder(
+                new ImageIoDecoder(
                         limits,
                         new ImageValidator()
                 ),
@@ -54,7 +54,7 @@ public final class ImageProcessor {
             File output,
             ImageConfig config,
             ExistingFilePolicy existingFilePolicy,
-            ImageDecoder decoder,
+            ImageIoDecoder decoder,
             ImageRenderer renderer,
             ImageFileWriter fileWriter
     ) {

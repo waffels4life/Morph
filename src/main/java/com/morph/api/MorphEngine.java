@@ -1,6 +1,6 @@
 package com.morph.api;
 
-import com.morph.codec.ImageDecoder;
+import com.morph.codec.ImageIoDecoder;
 import com.morph.config.ImageLimits;
 import com.morph.io.ImageFileWriter;
 import com.morph.process.ImageProcessor;
@@ -19,7 +19,7 @@ public final class MorphEngine {
         ImageLimits limits = ImageLimits.defaults();
         ImageValidator validator = new ImageValidator();
 
-        ImageDecoder decoder = new ImageDecoder(limits, validator);
+        ImageIoDecoder decoder = new ImageIoDecoder(limits, validator);
 
         ImageProcessor processor = new ImageProcessor(
                 request.getInput(),
