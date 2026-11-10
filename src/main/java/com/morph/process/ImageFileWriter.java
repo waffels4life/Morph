@@ -15,13 +15,19 @@ public final class ImageFileWriter {
 
     private final ImageEncoder encoder = new ImageEncoder();
     private final AtomicMovePolicy atomicMovePolicy;
+    private final FileMover fileMover; // testing interface
 
     public ImageFileWriter() {
-        this(AtomicMovePolicy.REQUIRE_ATOMIC);
+        this(AtomicMovePolicy.REQUIRE_ATOMIC, new NioFileMover());
     }
 
     public ImageFileWriter(AtomicMovePolicy atomicMovePolicy) {
+        this(atomicMovePolicy, new NioFileMover());
+    }
+
+    public ImageFileWriter(AtomicMovePolicy atomicMovePolicy, FileMover fileMover) {
         this.atomicMovePolicy = Objects.requireNonNull(atomicMovePolicy);
+        this.fileMover = Objects.requireNonNull(fileMover);
     }
 
     public void write(BufferedImage image,
