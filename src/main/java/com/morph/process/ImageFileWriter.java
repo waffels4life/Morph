@@ -8,26 +8,42 @@ import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 
 public final class ImageFileWriter {
 
-    private final ImageEncoder encoder = new ImageEncoder();
+    private final ImageEncoding encoder;
     private final AtomicMovePolicy atomicMovePolicy;
-    private final FileMover fileMover; // testing interface
+    private final FileMover fileMover;
 
     public ImageFileWriter() {
-        this(AtomicMovePolicy.REQUIRE_ATOMIC, new NioFileMover());
+        this(AtomicMovePolicy.REQUIRE_ATOMIC,
+                new NioFileMover(),
+                new ImageEncoder()
+        );
     }
 
     public ImageFileWriter(AtomicMovePolicy atomicMovePolicy) {
-        this(atomicMovePolicy, new NioFileMover());
+        this(atomicMovePolicy,
+                new NioFileMover(),
+                new ImageEncoder()
+        );
     }
 
     public ImageFileWriter(AtomicMovePolicy atomicMovePolicy, FileMover fileMover) {
+        this(atomicMovePolicy,
+                fileMover,
+                new ImageEncoder()
+        );
+    }
+
+    public ImageFileWriter(AtomicMovePolicy atomicMovePolicy,
+                           FileMover fileMover,
+                           ImageEncoding encoder) {
+
         this.atomicMovePolicy = Objects.requireNonNull(atomicMovePolicy);
         this.fileMover = Objects.requireNonNull(fileMover);
+        this.encoder = Objects.requireNonNull(encoder);
     }
 
     public void write(BufferedImage image,
