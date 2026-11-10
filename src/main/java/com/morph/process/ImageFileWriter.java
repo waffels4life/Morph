@@ -5,6 +5,7 @@ import com.morph.format.ImageFormat;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -13,6 +14,15 @@ import java.util.Objects;
 public final class ImageFileWriter {
 
     private final ImageEncoder encoder = new ImageEncoder();
+    private final AtomicMovePolicy atomicMovePolicy;
+
+    public ImageFileWriter() {
+        this(AtomicMovePolicy.REQUIRE_ATOMIC);
+    }
+
+    public ImageFileWriter(AtomicMovePolicy atomicMovePolicy) {
+        this.atomicMovePolicy = Objects.requireNonNull(atomicMovePolicy);
+    }
 
     public void write(BufferedImage image,
                       File output,
@@ -69,6 +79,31 @@ public final class ImageFileWriter {
                 if (failure != null) failure.addSuppressed(cleanupException);
                 else throw cleanupException;
             }
+        }
+    }
+
+
+    private void moveReplacing(Path temp, Path output) throws IOException {
+
+        try {
+            Files.move(
+                    temp,
+                    output,
+                    StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
+
+        }
+        catch (AtomicMoveNotSupportedException e) {
+
+            if (atomicMovePolicy == AtomicMovePolicy.REQUIRE_ATOMIC)
+                throw e;
+
+            Files.move(
+                    temp,
+                    output,
+                    StandardCopyOption.REPLACE_EXISTING
+            );
         }
     }
 }
