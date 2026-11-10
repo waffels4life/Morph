@@ -55,19 +55,14 @@ public final class ImageFileWriter {
             );
 
             switch (policy) {
-                case FAIL_IF_EXISTS ->
-                        Files.createLink(outputPath, temp);
-
-                case REPLACE_EXISTING ->
-                        Files.move(
-                                temp,
-                                outputPath,
-                                StandardCopyOption.ATOMIC_MOVE
-                        );
+                case FAIL_IF_EXISTS -> Files.createLink(outputPath, temp);
+                case REPLACE_EXISTING -> moveReplacing(outputPath, temp);
             }
 
         }
-        catch (IOException | RuntimeException | Error e) {
+        catch (IOException
+               | RuntimeException
+               | Error e) {
             failure = e;
             throw e;
         }
@@ -83,7 +78,7 @@ public final class ImageFileWriter {
     }
 
 
-    private void moveReplacing(Path temp, Path output) throws IOException {
+    private void moveReplacing(Path output, Path temp) throws IOException {
 
         try {
             Files.move(
