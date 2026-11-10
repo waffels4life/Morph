@@ -1,6 +1,7 @@
 package com.morph.codec;
 
 import com.morph.config.ImageLimits;
+import com.morph.exception.InvalidImageException;
 import com.morph.validation.ImageValidator;
 
 import javax.imageio.ImageIO;
@@ -37,7 +38,7 @@ public final class ImageDecoder {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInput);
 
             if (!readers.hasNext())
-                throw new IllegalArgumentException(
+                throw new InvalidImageException(
                         "Unsupported image format."
                 );
 
@@ -54,7 +55,7 @@ public final class ImageDecoder {
                 BufferedImage image = reader.read(0);
 
                 if (image == null)
-                    throw new IllegalArgumentException(
+                    throw new InvalidImageException(
                             "Could not decode image."
                     );
 

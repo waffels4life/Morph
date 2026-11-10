@@ -4,6 +4,7 @@ import com.morph.codec.ImageDecoder;
 import com.morph.config.ImageConfig;
 import com.morph.config.ImageLimits;
 import com.morph.config.InterpolationMode;
+import com.morph.exception.InvalidImageException;
 import com.morph.exception.MorphIOException;
 import com.morph.format.ImageFormat;
 import com.morph.io.ExistingFilePolicy;
@@ -18,7 +19,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -133,7 +133,7 @@ class ImageProcessorTest {
 
         // Act & Assert
         assertThrows(
-                IllegalArgumentException.class,
+                InvalidImageException.class,
                 processor::process
         );
 
