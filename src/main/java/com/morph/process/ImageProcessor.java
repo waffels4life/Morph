@@ -3,6 +3,7 @@ package com.morph.process;
 import com.morph.codec.ImageDecoder;
 import com.morph.config.ImageConfig;
 import com.morph.config.ImageLimits;
+import com.morph.exception.MorphIOException;
 import com.morph.geometry.ImageDimensions;
 import com.morph.geometry.ImageScaler;
 import com.morph.io.ExistingFilePolicy;
@@ -12,7 +13,6 @@ import com.morph.validation.ImageValidator;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Objects;
 
 public final class ImageProcessor {
@@ -92,11 +92,13 @@ public final class ImageProcessor {
             return output;
         }
         catch (IOException e) {
-            failure = e;
-            throw new UncheckedIOException(
+            MorphIOException exception = new MorphIOException(
                     "Image processing failed.",
                     e
             );
+
+            failure = exception;
+            throw exception;
         }
         catch (RuntimeException | Error e) {
             failure = e;

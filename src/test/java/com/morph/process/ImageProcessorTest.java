@@ -4,6 +4,7 @@ import com.morph.codec.ImageDecoder;
 import com.morph.config.ImageConfig;
 import com.morph.config.ImageLimits;
 import com.morph.config.InterpolationMode;
+import com.morph.exception.MorphIOException;
 import com.morph.format.ImageFormat;
 import com.morph.io.ExistingFilePolicy;
 import com.morph.validation.ImageValidator;
@@ -98,7 +99,7 @@ class ImageProcessorTest {
 
         // Act & Assert
         assertThrows(
-                java.io.UncheckedIOException.class,
+                MorphIOException.class,
                 processor::process
         );
 
@@ -173,7 +174,7 @@ class ImageProcessorTest {
 
         // Act & Assert
         assertThrows(
-                UncheckedIOException.class,
+                MorphIOException.class,
                 processor::process
         );
 
