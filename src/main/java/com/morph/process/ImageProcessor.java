@@ -27,26 +27,50 @@ public final class ImageProcessor {
     private final ImageFileWriter fileWriter;
     private final ImageDecoder decoder;
 
-    public ImageProcessor(File input,
-                          File output,
-                          ImageConfig config,
-                          ExistingFilePolicy existingFilePolicy,
-                          ImageLimits limits) {
+    public ImageProcessor(
+            File input,
+            File output,
+            ImageConfig config,
+            ExistingFilePolicy existingFilePolicy,
+            ImageLimits limits
+    ) {
+        this(
+                input,
+                output,
+                config,
+                existingFilePolicy,
+                new ImageDecoder(
+                        limits,
+                        new ImageValidator()
+                ),
+                new ImageRenderer(),
+                new ImageFileWriter()
+        );
+    }
 
+
+    public ImageProcessor(
+            File input,
+            File output,
+            ImageConfig config,
+            ExistingFilePolicy existingFilePolicy,
+            ImageDecoder decoder,
+            ImageRenderer renderer,
+            ImageFileWriter fileWriter
+    ) {
         this.input = Objects.requireNonNull(input);
         this.output = Objects.requireNonNull(output);
         this.config = Objects.requireNonNull(config);
         this.existingFilePolicy = Objects.requireNonNull(existingFilePolicy);
 
         this.scaler = new ImageScaler();
-        this.renderer = new ImageRenderer();
         this.validator = new ImageValidator();
-        this.fileWriter = new ImageFileWriter();
-        this.decoder = new ImageDecoder(
-                Objects.requireNonNull(limits),
-                validator
-        );
+
+        this.decoder = Objects.requireNonNull(decoder);
+        this.renderer = Objects.requireNonNull(renderer);
+        this.fileWriter = Objects.requireNonNull(fileWriter);
     }
+
 
     public ImageProcessor(File input,
                           File output,
