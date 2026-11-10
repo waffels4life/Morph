@@ -62,7 +62,7 @@ public final class ImageFileWriter {
 
             switch (policy) {
                 case FAIL_IF_EXISTS -> Files.createLink(outputPath, temp);
-                case REPLACE_EXISTING -> moveReplacing(outputPath, temp);
+                case REPLACE_EXISTING -> moveReplacing(temp, outputPath);
             }
 
         }
@@ -84,27 +84,16 @@ public final class ImageFileWriter {
     }
 
 
-    private void moveReplacing(Path output, Path temp) throws IOException {
+    private void moveReplacing(Path source, Path target) throws IOException {
 
         try {
-            Files.move(
-                    temp,
-                    output,
-                    StandardCopyOption.ATOMIC_MOVE,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
-
+            fileMover.moveAtomically(source, target);
         }
         catch (AtomicMoveNotSupportedException e) {
-
             if (atomicMovePolicy == AtomicMovePolicy.REQUIRE_ATOMIC)
                 throw e;
 
-            Files.move(
-                    temp,
-                    output,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
+            fileMover.moveNormally(source, target);
         }
     }
 }
