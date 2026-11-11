@@ -4,23 +4,32 @@ import java.util.Locale;
 import java.util.Objects;
 
 public final class ImageFormat {
-    public static final ImageFormat JPEG = new ImageFormat("jpeg");
-    public static final ImageFormat PNG = new ImageFormat("png");
-    public static final ImageFormat BMP = new ImageFormat("bmp");
+    public static final ImageFormat JPEG = new ImageFormat("jpeg", "jpg");
+    public static final ImageFormat PNG = new ImageFormat("png", "png");
+    public static final ImageFormat BMP = new ImageFormat("bmp", "bmp");
 
     private final String id;
+    private final String extension;
 
-    public ImageFormat(String id) {
-        Objects.requireNonNull(id);
+    public ImageFormat(String id, String extension) {
+        Objects.requireNonNull(id, "id");
+        Objects.requireNonNull(extension, "extension");
 
-        String normalize = id.trim().toLowerCase(Locale.ROOT);
+        this.id = id.trim().toLowerCase(Locale.ROOT);
+        this.extension = extension.trim().toLowerCase(Locale.ROOT);
 
-        if (normalize.isBlank())
+        if (this.id.isEmpty() || this.extension.isEmpty())
             throw new IllegalArgumentException(
-                    "Format id cannot be empty"
+                    "Format id and extension cannot be empty."
             );
+    }
 
-        this.id = id;
+    public String getId() {
+        return id;
+    }
+
+    public String getExtension() {
+        return extension;
     }
 
     @Override public boolean equals(Object o) {
