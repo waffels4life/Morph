@@ -1,6 +1,12 @@
-# Morph
+<p align="center">
+  <img src="assets/morph-logo.png" alt="Morph Logo" width="220" style="border-radius: 6px">
+</p>
 
-**A lightweight image processing engine written in Java.**
+<h1 align="center">Morph</h1>
+
+<p align="center">
+  A lightweight image processing engine written in Java.
+</p>
 
 ## Overview
 
@@ -202,15 +208,15 @@ The example assumes the input file and output directory already exist.
 
 ```java
 try {
-    Path result = engine.process(request);
+Path result = engine.process(request);
     System.out.println("Image saved to: " + result);
-} 
+}
 catch (InvalidImageException e) {
     System.err.println("Invalid image: " + e.getMessage());
-} 
-(MorphIOException e) {
+}
+catch (MorphIOException e) {
     System.err.println("Image I/O failure: " + e.getMessage());
-} 
+}
 catch (IllegalArgumentException e) {
     System.err.println("Invalid configuration: " + e.getMessage());
 }
