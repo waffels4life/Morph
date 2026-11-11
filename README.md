@@ -236,6 +236,29 @@ Format support is based on the current `ImageFormat` implementation and availabl
 
 JPEG compression quality is configurable between `0.0` and `1.0`.
 
+## Testing
+
+Morph includes automated unit tests covering its core components and image processing workflow.
+
+The test suite covers:
+
+- Image decoding and validation.
+- Image processing and resizing.
+- Output file writing and overwrite policies.
+- Resource cleanup and exception handling.
+- Public API behavior.
+
+The project uses JUnit 6 for automated testing.
+
+Run the test suite with Maven:
+
+```bash
+mvn test
+```
+
+**Latest verification:** 28 tests passed, with 0 failures and 0 errors.
+
+
 ## Limitations
 
 The current release intentionally keeps its scope small.
