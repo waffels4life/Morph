@@ -180,20 +180,20 @@ The public API is based on `Path`, `ImageRequest`, `ImageConfig`, and `MorphEngi
 Path input = Path.of("images/input.png");
 Path output = Path.of("images/output.jpg");
 
-ImageConfig config = new ImageConfig(
-        800,
-        600,
-        ImageFormat.JPEG,
-        0.85f,
-        InterpolationMode.BICUBIC
-);
+ImageConfig config = ImageConfig.builder()
+        .width(800)
+        .height(600)
+        .format(ImageFormat.JPEG)
+        .quality(0.85f)
+        .interpolationMode(InterpolationMode.BICUBIC)
+        .build();
 
-ImageRequest request = new ImageRequest(
-        input,
-        output,
-        config,
-        ExistingFilePolicy.FAIL_IF_EXISTS
-);
+ImageRequest request = ImageRequest.builder()
+        .input(input)
+        .output(output)
+        .config(config)
+        .existingFilePolicy(ExistingFilePolicy.FAIL_IF_EXISTS)
+        .build();
 
 MorphEngine engine = new MorphEngine();
 
