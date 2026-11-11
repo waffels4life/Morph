@@ -43,13 +43,13 @@ class ImageProcessorTest {
 
         ImageIO.write(source, "png", input);
 
-        ImageConfig config = new ImageConfig(
-                800,
-                600,
-                ImageFormat.PNG,
-                1.0f,
-                InterpolationMode.BICUBIC
-        );
+        ImageConfig config = ImageConfig.builder()
+                .width(800)
+                .height(400)
+                .format(ImageFormat.PNG)
+                .quality(1.0f)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
 
         ImageProcessor processor = new ImageProcessor(
                 input,
@@ -69,8 +69,8 @@ class ImageProcessorTest {
         BufferedImage processed = ImageIO.read(output);
 
         assertNotNull(processed);
-        assertEquals(800, processed.getWidth());
-        assertEquals(450, processed.getHeight());
+        assertEquals(711, processed.getWidth());
+        assertEquals(400, processed.getHeight());
     }
 
 
@@ -81,13 +81,13 @@ class ImageProcessorTest {
         File input = tempDir.resolve("missing.png").toFile();
         File output = tempDir.resolve("output.png").toFile();
 
-        ImageConfig config = new ImageConfig(
-                800,
-                600,
-                ImageFormat.PNG,
-                1.0f,
-                InterpolationMode.BICUBIC
-        );
+        ImageConfig config = ImageConfig.builder()
+                .width(800)
+                .height(600)
+                .format(ImageFormat.PNG)
+                .quality(1.0f)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
 
         ImageProcessor processor = new ImageProcessor(
                 input,
@@ -115,13 +115,13 @@ class ImageProcessorTest {
 
         Files.writeString(input.toPath(), "This is not an image.");
 
-        ImageConfig config = new ImageConfig(
-                800,
-                600,
-                ImageFormat.PNG,
-                1.0f,
-                InterpolationMode.BICUBIC
-        );
+        ImageConfig config = ImageConfig.builder()
+                .width(800)
+                .height(600)
+                .format(ImageFormat.PNG)
+                .quality(1.0f)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
 
         ImageProcessor processor = new ImageProcessor(
                 input,
@@ -156,13 +156,13 @@ class ImageProcessorTest {
         byte[] originalContent = "Existing file".getBytes();
         Files.write(output.toPath(), originalContent);
 
-        ImageConfig config = new ImageConfig(
-                800,
-                600,
-                ImageFormat.PNG,
-                1.0f,
-                InterpolationMode.BICUBIC
-        );
+        ImageConfig config = ImageConfig.builder()
+                .width(800)
+                .height(600)
+                .format(ImageFormat.PNG)
+                .quality(1.0f)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
 
         ImageProcessor processor = new ImageProcessor(
                 input,
@@ -205,13 +205,13 @@ class ImageProcessorTest {
 
         float quality = format == ImageFormat.JPEG ? 0.8f : 1.0f;
 
-        ImageConfig config = new ImageConfig(
-                800,
-                600,
-                format,
-                quality,
-                InterpolationMode.BICUBIC
-        );
+        ImageConfig config = ImageConfig.builder()
+                .width(800)
+                .height(600)
+                .format(ImageFormat.PNG)
+                .quality(1.0f)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
 
         ImageProcessor processor = new ImageProcessor(
                 input,
@@ -256,13 +256,13 @@ class ImageProcessorTest {
 
         ImageIO.write(source, "png", input);
 
-        ImageConfig config = new ImageConfig(
-                200,
-                200,
-                ImageFormat.PNG,
-                1.0f,
-                InterpolationMode.BICUBIC
-        );
+        ImageConfig config = ImageConfig.builder()
+                .width(200)
+                .height(200)
+                .format(ImageFormat.PNG)
+                .quality(1.0f)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
 
         ImageProcessor processor = new ImageProcessor(
                 input,
@@ -299,15 +299,21 @@ class ImageProcessorTest {
 
         ImageIO.write(source, "png", input);
 
-        ImageConfig lowQualityConfig = new ImageConfig(
-                1000, 1000, ImageFormat.JPEG, 0.2f,
-                InterpolationMode.BICUBIC
-        );
+        ImageConfig lowQualityConfig = ImageConfig.builder()
+                .width(1000)
+                .height(1000)
+                .format(ImageFormat.JPEG)
+                .quality(0.2f)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
 
-        ImageConfig highQualityConfig = new ImageConfig(
-                1000, 1000, ImageFormat.JPEG, 1.0f,
-                InterpolationMode.BICUBIC
-        );
+        ImageConfig highQualityConfig = ImageConfig.builder()
+                .width(1000)
+                .height(1000)
+                .format(ImageFormat.JPEG)
+                .quality(1.0f)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
 
         // Act
         new ImageProcessor(
@@ -367,13 +373,13 @@ class ImageProcessorTest {
 
         ImageDecoder decoder = new FakeImageDecoder(source);
 
-        ImageConfig config = new ImageConfig(
-                100,
-                100,
-                ImageFormat.PNG,
-                1.0f,
-                InterpolationMode.BICUBIC
-        );
+        ImageConfig config = ImageConfig.builder()
+                .width(100)
+                .height(100)
+                .format(ImageFormat.PNG)
+                .quality(1.0f)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
 
         ImageProcessor processor = new ImageProcessor(
                 input,

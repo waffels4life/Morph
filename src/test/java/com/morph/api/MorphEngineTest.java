@@ -9,7 +9,6 @@ import org.junit.jupiter.api.io.TempDir;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,7 +19,6 @@ class MorphEngineTest {
 
     @TempDir
     Path tempDir;
-
 
     @Test
     void shouldProcessImageSuccessfully() throws IOException {
@@ -36,20 +34,20 @@ class MorphEngineTest {
 
         ImageIO.write(source, "png", input.toFile());
 
-        ImageConfig config = new ImageConfig(
-                400,
-                400,
-                ImageFormat.PNG,
-                1.0f,
-                InterpolationMode.BICUBIC
-        );
+        ImageConfig config = ImageConfig.builder()
+                .width(400)
+                .height(400)
+                .format(ImageFormat.PNG)
+                .quality(1.0f)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
 
-        ImageRequest request = new ImageRequest(
-                input,
-                output,
-                config,
-                ExistingFilePolicy.FAIL_IF_EXISTS
-        );
+        ImageRequest request = ImageRequest.builder()
+                .input(input)
+                .output(output)
+                .config(config)
+                .existingFilePolicy(ExistingFilePolicy.FAIL_IF_EXISTS)
+                .build();
 
         MorphEngine engine = new MorphEngine();
 
