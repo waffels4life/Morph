@@ -3,18 +3,18 @@ package com.morph.api;
 import com.morph.config.ImageConfig;
 import com.morph.io.ExistingFilePolicy;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public final class ImageRequest {
 
-    private final File input;
-    private final File output;
+    private final Path input;
+    private final Path output;
     private final ImageConfig config;
     private final ExistingFilePolicy existingFilePolicy;
 
-    public ImageRequest(File input,
-                        File output,
+    public ImageRequest(Path input,
+                        Path output,
                         ImageConfig config,
                         ExistingFilePolicy existingFilePolicy) {
 
@@ -24,11 +24,11 @@ public final class ImageRequest {
         this.existingFilePolicy = Objects.requireNonNull(existingFilePolicy);
     }
 
-    public File getInput() {
+    public Path getInput() {
         return input;
     }
 
-    public File getOutput() {
+    public Path getOutput() {
         return output;
     }
 

@@ -11,6 +11,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,11 +21,12 @@ class MorphEngineTest {
     @TempDir
     Path tempDir;
 
+
     @Test
     void shouldProcessImageSuccessfully() throws IOException {
 
-        File input = tempDir.resolve("input.png").toFile();
-        File output = tempDir.resolve("output.png").toFile();
+        Path input = tempDir.resolve("input.png");
+        Path output = tempDir.resolve("output.png");
 
         BufferedImage source = new BufferedImage(
                 800,
@@ -32,7 +34,7 @@ class MorphEngineTest {
                 BufferedImage.TYPE_INT_RGB
         );
 
-        ImageIO.write(source, "png", input);
+        ImageIO.write(source, "png", input.toFile());
 
         ImageConfig config = new ImageConfig(
                 400,
@@ -51,13 +53,13 @@ class MorphEngineTest {
 
         MorphEngine engine = new MorphEngine();
 
-        File result = engine.process(request);
+        Path result = engine.process(request);
 
         assertNotNull(result);
         assertEquals(output, result);
-        assertTrue(output.exists());
+        assertTrue(Files.exists(output));
 
-        BufferedImage processed = ImageIO.read(output);
+        BufferedImage processed = ImageIO.read(output.toFile());
 
         assertNotNull(processed);
         assertEquals(400, processed.getWidth());
@@ -66,4 +68,5 @@ class MorphEngineTest {
         processed.flush();
         source.flush();
     }
+
 }
