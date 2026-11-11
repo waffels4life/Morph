@@ -10,6 +10,11 @@
     <artifactId>morph</artifactId>
     <version>0.1.0</version>
 
+
+    <name>Morph</name>
+    <description>A lightweight image processing engine.</description>
+    <url>https://github.com/waffels4life/Morph</url>
+
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
