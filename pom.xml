@@ -23,6 +23,21 @@
         </license>
     </licenses>
 
+    <developers>
+        <developer>
+            <id>waffels4life</id>
+            <name>Arsam</name>
+            <url>https://github.com/waffels4life</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/waffels4life/Morph.git</connection>
+        <developerConnection>scm:git:ssh://github.com/waffels4life/Morph.git</developerConnection>
+        <url>https://github.com/waffels4life/Morph</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
