@@ -1,23 +1,40 @@
 package com.morph.format;
 
-public enum ImageFormat {
-    JPEG("jpeg", "jpg"),
-    PNG("png", "png"),
-    BMP("bmp", "bmp");
+import java.util.Locale;
+import java.util.Objects;
 
-    private final String formatName;
-    private final String extension;
+public final class ImageFormat {
+    public static final ImageFormat JPEG = new ImageFormat("jpeg");
+    public static final ImageFormat PNG = new ImageFormat("png");
+    public static final ImageFormat BMP = new ImageFormat("bmp");
 
-    ImageFormat(String formatName, String extension) {
-        this.formatName = formatName;
-        this.extension = extension;
+    private final String id;
+
+    public ImageFormat(String id) {
+        Objects.requireNonNull(id);
+
+        String normalize = id.trim().toLowerCase(Locale.ROOT);
+
+        if (normalize.isBlank())
+            throw new IllegalArgumentException(
+                    "Format id cannot be empty"
+            );
+
+        this.id = id;
     }
 
-    public String getFormatName() {
-        return formatName;
+    @Override public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ImageFormat other)) return false;
+
+        return id.equals(other.id);
     }
 
-    public String getExtension() {
-        return extension;
+    @Override public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override public String toString() {
+        return id;
     }
 }
