@@ -26,11 +26,11 @@ public final class ImageConfig {
         this.interpolationMode = interpolationMode;
     }
 
-    private void validate(int width,
-                          int height,
-                          ImageFormat format,
-                          float quality,
-                          InterpolationMode interpolationMode) {
+    private static void validate(int width,
+                                 int height,
+                                 ImageFormat format,
+                                 float quality,
+                                 InterpolationMode interpolationMode) {
 
         Objects.requireNonNull(format);
         Objects.requireNonNull(interpolationMode);
@@ -41,7 +41,6 @@ public final class ImageConfig {
             );
 
         if (!Float.isFinite(quality)
-                || Float.isNaN(quality)
                 || quality < 0.0f
                 || quality > 1.0f)
             throw new IllegalArgumentException(
