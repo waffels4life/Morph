@@ -484,5 +484,16 @@ class ImageProcessorTest {
         );
     }
 
+    @Test
+    void shouldReturnIdAsString() {
+        ImageFormat format = new ImageFormat("webp", "webp");
+        assertEquals("webp", format.toString());
+    }
 
+    @Test
+    void shouldReturnNormalizedStrings() {
+        ImageFormat format = new ImageFormat(" Webp ", "WeBp");
+        assertEquals("webp", format.getId());
+        assertEquals("webp", format.getExtension());
+    }
 }
