@@ -12,7 +12,7 @@ import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -185,7 +186,7 @@ class ImageProcessorTest {
 
 
     @ParameterizedTest
-    @EnumSource(ImageFormat.class)
+    @MethodSource("supportedFormats")
     void shouldSupportAllImageFormats(ImageFormat format) throws IOException {
 
         // Arrange
@@ -232,6 +233,14 @@ class ImageProcessorTest {
         assertNotNull(decoded);
         assertEquals(800, decoded.getWidth());
         assertEquals(450, decoded.getHeight());
+    }
+
+    static Stream<ImageFormat> supportedFormats() {
+        return Stream.of(
+                ImageFormat.JPEG,
+                ImageFormat.PNG,
+                ImageFormat.BMP
+        );
     }
 
 
@@ -401,5 +410,79 @@ class ImageProcessorTest {
 
         result.flush();
     }
+
+    @Test
+    void shouldCreateNewImageFormat() {
+        ImageFormat format = new ImageFormat("webp", "webp");
+        assertEquals("webp", format.getId());
+        assertEquals("webp", format.getExtension());
+    }
+
+    @Test
+    void shouldTreatDifferentInstancesWithSameIdAsEqual() {
+        ImageFormat first = new ImageFormat("webp", "webp");
+        ImageFormat second = new ImageFormat("webp", "webp");
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
+    void shouldNormalizeIdAndExtensionBeforeComparison() {
+        ImageFormat first = new ImageFormat("webp", "webp");
+        ImageFormat second = new ImageFormat("WEBP", " WEBP ");
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
+    void shouldRejectNullIDAsInput() {
+        assertThrows(
+                NullPointerException.class,
+                () -> new ImageFormat(null, "webp")
+        );
+    }
+
+    @Test
+    void shouldRejectNullExtensionAsInput() {
+        assertThrows(
+                NullPointerException.class,
+                () -> new ImageFormat("webp", null)
+        );
+    }
+
+    @Test
+    void shouldRejectEmptyIDAsInput() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new ImageFormat("", "webp")
+        );
+    }
+
+    @Test
+    void shouldRejectEmptyExtensionAsInput() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new ImageFormat("webp", "")
+        );
+    }
+
+    @Test
+    void shouldRejectWhiteSpaceIDAsInput() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new ImageFormat("   ", "webp")
+        );
+    }
+
+    @Test
+    void shouldRejectWhiteSpaceExtensionAsInput() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new ImageFormat("webp", "   ")
+        );
+    }
+
 
 }

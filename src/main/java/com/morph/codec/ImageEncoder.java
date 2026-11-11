@@ -32,7 +32,7 @@ public final class ImageEncoder implements ImageEncoding {
             );
 
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(
-                format.getFormatName()
+                format.getId()
         );
 
         if (!writers.hasNext())
