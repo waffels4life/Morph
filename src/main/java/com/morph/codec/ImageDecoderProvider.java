@@ -8,5 +8,5 @@ public interface ImageDecoderProvider {
 
     Set<ImageFormat> getSupportedFormats();
 
-    ImageDecoder createDecoder();
+    ImageDecoder createDecoder(DecoderContext decoderContext);
 }
