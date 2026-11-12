@@ -1,4 +1,4 @@
 package com.morph.codec;
 
-public class EncoderContext {
+public final class EncoderContext {
 }

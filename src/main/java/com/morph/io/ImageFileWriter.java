@@ -1,7 +1,7 @@
 package com.morph.io;
 
 import com.morph.format.ImageFormat;
-import com.morph.codec.ImageEncoder;
+import com.morph.codec.ImageIoEncoder;
 import com.morph.codec.ImageEncoding;
 
 import java.awt.image.BufferedImage;
@@ -21,21 +21,21 @@ public final class ImageFileWriter {
     public ImageFileWriter() {
         this(AtomicMovePolicy.REQUIRE_ATOMIC,
                 new NioFileMover(),
-                new ImageEncoder()
+                new ImageIoEncoder()
         );
     }
 
     public ImageFileWriter(AtomicMovePolicy atomicMovePolicy) {
         this(atomicMovePolicy,
                 new NioFileMover(),
-                new ImageEncoder()
+                new ImageIoEncoder()
         );
     }
 
     public ImageFileWriter(AtomicMovePolicy atomicMovePolicy, FileMover fileMover) {
         this(atomicMovePolicy,
                 fileMover,
-                new ImageEncoder()
+                new ImageIoEncoder()
         );
     }
 
