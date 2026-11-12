@@ -6,6 +6,7 @@ import com.morph.config.ImageLimits;
 import com.morph.io.ImageFileWriter;
 import com.morph.process.ImageProcessor;
 import com.morph.process.ImageRenderer;
+import com.morph.validation.ImageDimensionValidator;
 import com.morph.validation.ImageValidator;
 
 import java.nio.file.Path;
@@ -18,9 +19,9 @@ public final class MorphEngine {
         Objects.requireNonNull(request, "request");
 
         ImageLimits limits = ImageLimits.defaults();
+        ImageDimensionValidator dimensionValidator = new ImageDimensionValidator(limits);
+        ImageDecoder decoder = new ImageIoDecoder(dimensionValidator);
         ImageValidator validator = new ImageValidator();
-
-        ImageDecoder decoder = new ImageIoDecoder(limits, validator);
 
         ImageProcessor processor = new ImageProcessor(
                 request.getInput().toFile(),
