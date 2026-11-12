@@ -1,26 +1,44 @@
 package com.morph.api;
 
+import com.morph.codec.CodecProviderLoader;
+import com.morph.codec.CodecRegistry;
+import com.morph.codec.DecoderContext;
 import com.morph.codec.ImageDecoder;
-import com.morph.codec.ImageIoDecoder;
+import com.morph.codec.ImageFormatDetector;
+import com.morph.codec.ImageIoFormatDetector;
 import com.morph.config.ImageLimits;
+import com.morph.format.ImageFormat;
 import com.morph.io.ImageFileWriter;
 import com.morph.process.ImageProcessor;
 import com.morph.process.ImageRenderer;
 import com.morph.validation.ImageDimensionValidator;
-import com.morph.validation.ImageValidator;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 
 public final class MorphEngine {
 
-    public Path process(ImageRequest request) {
+    public Path process(ImageRequest request) throws IOException {
 
         Objects.requireNonNull(request, "request");
 
         ImageLimits limits = ImageLimits.defaults();
         ImageDimensionValidator dimensionValidator = new ImageDimensionValidator(limits);
-        ImageDecoder decoder = new ImageIoDecoder(dimensionValidator);
+        DecoderContext context = new DecoderContext(dimensionValidator);
+        CodecRegistry registry = new CodecRegistry(
+                CodecProviderLoader.loadDecoderProviders(),
+                context
+        );
+
+        ImageFormatDetector detector = new ImageIoFormatDetector();
+
+        ImageFormat inputFormat = detector.detect(
+                request.getInput().toFile()
+        );
+
+        ImageDecoder decoder = registry.getDecoder(inputFormat);
+
 
         ImageProcessor processor = new ImageProcessor(
                 request.getInput().toFile(),
