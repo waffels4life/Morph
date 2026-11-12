@@ -21,7 +21,6 @@ public final class MorphEngine {
         ImageLimits limits = ImageLimits.defaults();
         ImageDimensionValidator dimensionValidator = new ImageDimensionValidator(limits);
         ImageDecoder decoder = new ImageIoDecoder(dimensionValidator);
-        ImageValidator validator = new ImageValidator();
 
         ImageProcessor processor = new ImageProcessor(
                 request.getInput().toFile(),
