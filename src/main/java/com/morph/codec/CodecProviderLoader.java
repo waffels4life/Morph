@@ -1,5 +1,7 @@
 package com.morph.codec;
 
+import com.morph.codec.decoder.ImageDecoderProvider;
+
 import java.util.HashSet;
 import java.util.ServiceLoader;
 import java.util.Set;

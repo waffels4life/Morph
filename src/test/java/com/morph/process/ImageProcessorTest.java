@@ -1,6 +1,6 @@
 package com.morph.process;
 
-import com.morph.codec.ImageDecoder;
+import com.morph.codec.decoder.ImageDecoder;
 import com.morph.config.ImageConfig;
 import com.morph.config.InterpolationMode;
 import com.morph.exception.InvalidImageException;

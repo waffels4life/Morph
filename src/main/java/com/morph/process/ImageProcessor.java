@@ -1,7 +1,7 @@
 package com.morph.process;
 
-import com.morph.codec.ImageDecoder;
-import com.morph.codec.ImageIoDecoder;
+import com.morph.codec.decoder.ImageDecoder;
+import com.morph.codec.decoder.ImageIoDecoder;
 import com.morph.config.ImageConfig;
 import com.morph.config.ImageLimits;
 import com.morph.exception.MorphIOException;

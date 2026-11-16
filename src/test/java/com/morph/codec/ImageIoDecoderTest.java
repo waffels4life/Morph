@@ -1,9 +1,9 @@
 package com.morph.codec;
 
+import com.morph.codec.decoder.ImageIoDecoder;
 import com.morph.config.ImageLimits;
 import com.morph.exception.InvalidImageException;
 import com.morph.validation.ImageDimensionValidator;
-import com.morph.validation.ImageValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 

@@ -1,8 +1,8 @@
 package com.morph.io;
 
 import com.morph.format.ImageFormat;
-import com.morph.codec.ImageIoEncoder;
-import com.morph.codec.ImageEncoding;
+import com.morph.codec.encoder.ImageIoEncoder;
+import com.morph.codec.encoder.ImageEncoding;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

@@ -1,4 +1,4 @@
-package com.morph.codec;
+package com.morph.codec.detection;
 
 import com.morph.exception.InvalidImageException;
 import com.morph.format.ImageFormat;

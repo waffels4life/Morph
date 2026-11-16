@@ -1,11 +1,11 @@
 package com.morph.api;
 
 import com.morph.codec.CodecProviderLoader;
-import com.morph.codec.CodecRegistry;
-import com.morph.codec.DecoderContext;
-import com.morph.codec.ImageDecoder;
-import com.morph.codec.ImageFormatDetector;
-import com.morph.codec.ImageIoFormatDetector;
+import com.morph.codec.decoder.CodecRegistry;
+import com.morph.codec.decoder.DecoderContext;
+import com.morph.codec.decoder.ImageDecoder;
+import com.morph.codec.detection.ImageFormatDetector;
+import com.morph.codec.detection.ImageIoFormatDetector;
 import com.morph.config.ImageLimits;
 import com.morph.format.ImageFormat;
 import com.morph.io.ImageFileWriter;

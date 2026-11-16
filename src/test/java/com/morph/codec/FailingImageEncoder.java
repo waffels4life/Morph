@@ -1,5 +1,6 @@
 package com.morph.codec;
 
+import com.morph.codec.encoder.ImageEncoding;
 import com.morph.format.ImageFormat;
 
 import java.awt.image.BufferedImage;
