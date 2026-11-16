@@ -31,9 +31,9 @@ public final class ImageIoEncoder implements ImageEncoder {
         Objects.requireNonNull(image, "Image cannot be null.");
         Objects.requireNonNull(output, "Output cannot be null.");
 
-        if (quality < 0.0f
-                || quality > 1.0f
-                || Float.isNaN(quality))
+        if (!Float.isFinite(quality)
+                || quality < 0.0f
+                || quality > 1.0f)
             throw new IllegalArgumentException(
                     "Invalid image quality."
             );
