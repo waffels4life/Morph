@@ -68,7 +68,7 @@ public class ImageFileWriterTest {
 
         ImageFileWriter writer = createWriter(
                 AtomicMovePolicy.REQUIRE_ATOMIC,
-                new NioFileMover(),
+                mover,
                 new ImageIoEncoder(ImageFormat.PNG)
         );
 
@@ -101,9 +101,9 @@ public class ImageFileWriterTest {
                 new UnsupportedAtomicFileMover();
 
         ImageFileWriter writer = createWriter(
-                AtomicMovePolicy.REQUIRE_ATOMIC,
-                new NioFileMover(),
-                new FailingImageEncoder()
+                AtomicMovePolicy.ALLOW_NON_ATOMIC_FALLBACK,
+                mover,
+                new ImageIoEncoder(ImageFormat.PNG)
         );
 
         BufferedImage image = new BufferedImage(
@@ -151,7 +151,7 @@ public class ImageFileWriterTest {
 
         ImageFileWriter writer = createWriter(
                 AtomicMovePolicy.REQUIRE_ATOMIC,
-                new NioFileMover(),
+                mover,
                 new ImageIoEncoder(ImageFormat.PNG)
         );
 
@@ -258,7 +258,7 @@ public class ImageFileWriterTest {
         ImageFileWriter writer = createWriter(
                 AtomicMovePolicy.REQUIRE_ATOMIC,
                 new NioFileMover(),
-                new ImageIoEncoder(ImageFormat.PNG)
+                new FailingImageEncoder()
         );
 
         BufferedImage image = new BufferedImage(
@@ -291,7 +291,7 @@ public class ImageFileWriterTest {
         ImageFileWriter writer = createWriter(
                 AtomicMovePolicy.REQUIRE_ATOMIC,
                 new NioFileMover(),
-                new ImageIoEncoder(ImageFormat.PNG)
+                new FailingImageEncoder()
         );
 
         BufferedImage image = new BufferedImage(
