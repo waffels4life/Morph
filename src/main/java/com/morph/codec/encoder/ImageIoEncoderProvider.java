@@ -1,8 +1,8 @@
-
 package com.morph.codec.encoder;
 
 import com.morph.format.ImageFormat;
 
+import java.util.Objects;
 import java.util.Set;
 
 public final class ImageIoEncoderProvider implements ImageEncoderProvider {
@@ -17,8 +17,15 @@ public final class ImageIoEncoderProvider implements ImageEncoderProvider {
         return SUPPORTED_FORMATS;
     }
 
-    @Override public ImageEncoder createEncoder(ImageFormat format) {
+    @Override
+    public ImageEncoder createEncoder(ImageFormat format) {
+        Objects.requireNonNull(format, "Format cannot be null.");
+
+        if (!SUPPORTED_FORMATS.contains(format))
+            throw new IllegalArgumentException(
+                    "Unsupported image format: " + format.getId()
+            );
+
         return new ImageIoEncoder(format);
     }
-
 }
