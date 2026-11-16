@@ -1,5 +1,7 @@
 package com.morph.api;
 
+import com.morph.codec.CodecProviderLoader;
+import com.morph.codec.decoder.ImageDecoderProvider;
 import com.morph.config.ImageConfig;
 import com.morph.config.InterpolationMode;
 import com.morph.format.ImageFormat;
@@ -12,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 

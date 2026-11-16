@@ -42,21 +42,22 @@ public final class ImageConfig {
         Objects.requireNonNull(format, "format");
         Objects.requireNonNull(interpolationMode, "interpolationMode");
 
-        if (width <= 0 || height <= 0) {
+        if (width <= 0 || height <= 0)
             throw new IllegalArgumentException(
                     "Image dimensions must be positive."
             );
-        }
 
-        if (!Float.isFinite(quality) || quality < 0.0f || quality > 1.0f) {
-            throw new IllegalArgumentException("Invalid image quality.");
-        }
+        if (!Float.isFinite(quality)
+                || quality < 0.0f
+                || quality > 1.0f)
+            throw new IllegalArgumentException(
+                    "Invalid image quality."
+            );
 
-        if (format != ImageFormat.JPEG && quality != 1.0f) {
+        if (format != ImageFormat.JPEG && quality != 1.0f)
             throw new IllegalArgumentException(
                     "Quality configuration is only supported for JPEG."
             );
-        }
     }
 
     public int getWidth() {

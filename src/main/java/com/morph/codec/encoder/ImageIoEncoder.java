@@ -1,4 +1,4 @@
-package com.morph.codec;
+package com.morph.codec.encoder;
 
 import com.morph.format.ImageFormat;
 
@@ -13,26 +13,33 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Objects;
 
-public final class ImageEncoder implements ImageEncoding {
+public final class ImageIoEncoder implements ImageEncoder {
+
+    private final ImageFormat format;
+
+    public ImageIoEncoder(ImageFormat format) {
+        this.format = Objects.requireNonNull(
+                format,
+                "Format cannot be null."
+        );
+    }
 
     @Override public void encode(BufferedImage image,
-                       File output,
-                       ImageFormat format,
-                       float quality) throws IOException {
+                                 File output,
+                                 float quality) throws IOException {
 
         Objects.requireNonNull(image, "Image cannot be null.");
         Objects.requireNonNull(output, "Output cannot be null.");
-        Objects.requireNonNull(format, "Format cannot be null.");
 
-        if (quality < 0.0f
-                || quality > 1.0f
-                || Float.isNaN(quality))
+        if (!Float.isFinite(quality)
+                || quality < 0.0f
+                || quality > 1.0f)
             throw new IllegalArgumentException(
                     "Invalid image quality."
             );
 
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(
-                format.getFormatName()
+                format.getId()
         );
 
         if (!writers.hasNext())

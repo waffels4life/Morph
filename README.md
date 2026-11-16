@@ -5,7 +5,7 @@
 <h1 align="center">Morph</h1>
 
 <p align="center">
-  A lightweight image processing engine written in Java.
+  A lightweight, extensible image processing engine.
 </p>
 
 ## Overview
@@ -14,27 +14,53 @@ Morph is a lightweight Java image processing engine designed to provide a simple
 
 It focuses on clear separation of responsibilities, controlled resource management, safe file operations, and explicit error handling.
 
-Morph is designed as an extensible foundation rather than a feature-heavy image editing framework.
+Morph is built around an extensible architecture that allows new image decoding and encoding implementations to be integrated without changing the core processing pipeline.
+
+Rather than being a feature-heavy image editing framework, Morph provides a small, modular foundation that can evolve as new requirements emerge.
 
 ## Features
+
+### Image Processing
 
 - Image resizing with aspect ratio preservation.
 - Configurable interpolation methods:
   - Nearest Neighbor
   - Bilinear
   - Bicubic
+- Configurable output dimensions.
 - Support for JPEG, PNG, and BMP formats.
 - Configurable JPEG compression quality.
-- Configurable output dimensions.
-- Input and output validation.
+
+### Validation & Reliability
+
+- Input and output file validation.
 - Configurable image dimension and pixel-count limits.
+- Image metadata validation before decoding.
+- Dedicated exception hierarchy.
+- Explicit resource management and cleanup.
+- Preservation of secondary cleanup failures.
+
+### File Safety
+
 - Explicit output file overwrite policies.
 - Temporary-file-based output writing.
-- Atomic file movement with a controlled fallback mechanism.
-- Dedicated exception hierarchy for predictable error handling.
-- Decoder and encoder abstractions for future extensibility.
+- Atomic file movement with a configurable fallback policy.
+- Protection against incomplete output files caused by encoding failures.
+
+### Extensibility
+
+- Decoder and encoder abstractions.
+- Provider-based codec architecture.
+- Automatic provider discovery through Java's `ServiceLoader`.
+- Support for adding alternative codec implementations.
+- Extensible processing components without modifying the core processing pipeline.
+
+### API & Design
+
 - Immutable request and configuration objects.
 - Path-based public API using Java NIO.
+- Composition-root-based engine initialization.
+- Modular, responsibility-oriented architecture.
 
 ## Architecture
 
@@ -53,10 +79,68 @@ The main processing pipeline consists of:
 - **Separation of Concerns:** Validation, decoding, rendering, and file writing are handled by separate components.
 - **Abstraction:** Decoder and encoder implementations are accessed through interfaces, reducing coupling to specific implementations.
 - **Immutability:** Public request and configuration objects are immutable after construction.
-- **Dependency Injection:** Core processing components support dependency injection, allowing alternative implementations without changing the processing workflow.
+- **Dependency Injection:** Processing components receive their dependencies through constructors, allowing alternative implementations.
 - **Composition Root:** `MorphEngine` assembles the required components and exposes a simple public API.
+- **Extensibility:** Codec implementations are discovered through provider interfaces, keeping the processing workflow independent of specific codec implementations.
 
-This design keeps the processing workflow independent of specific decoder and encoder implementations, while allowing individual components to evolve separately.
+This design allows individual components to evolve independently while keeping the core processing pipeline relatively stable.
+
+## Extensibility
+
+Extensibility is one of the central design considerations in Morph.
+
+The decoding and encoding layers are built around provider interfaces rather than being tightly coupled to specific implementations.
+
+Morph uses Java's `ServiceLoader` mechanism to discover available codec providers at runtime.
+
+### Codec Providers
+
+The current architecture defines two provider contracts:
+
+- `ImageDecoderProvider` — provides image decoder implementations.
+- `ImageEncoderProvider` — provides image encoder implementations.
+
+A provider declares the image formats it supports and creates the corresponding decoder or encoder.
+
+This allows additional codec implementations to be introduced without modifying `MorphEngine` or the main image processing workflow.
+
+### Adding a New Codec Implementation
+
+To extend the codec system:
+
+1. Implement the appropriate decoder or encoder interface.
+2. Create a provider implementing `ImageDecoderProvider` or `ImageEncoderProvider`.
+3. Declare the formats supported by the provider.
+4. Register the provider through the appropriate `META-INF/services` file.
+5. Make the provider available on the application's runtime classpath.
+
+For example, a custom decoder provider can be registered using:
+
+```text
+META-INF/services/com.morph.codec.decoder.ImageDecoderProvider
+```
+
+The file contains the fully qualified name of the provider implementation:
+
+```text
+com.example.codec.CustomDecoderProvider
+```
+
+Encoder providers follow the same mechanism:
+
+```text
+META-INF/services/com.morph.codec.encoder.ImageEncoderProvider
+```
+
+Morph discovers registered providers through `ServiceLoader`, and the codec registries make their implementations available to the processing workflow.
+
+### Extension Boundaries
+
+The current architecture supports alternative decoder and encoder implementations for formats represented by `ImageFormat`.
+
+Adding an entirely new image format may also require extending the `ImageFormat` model and its associated format-handling logic.
+
+The current release supports provider-based discovery through `ServiceLoader`. It does not expose a separate runtime API for dynamically registering or removing providers.
 
 ## Reliability & Security
 
@@ -168,7 +252,9 @@ Morph also preserves secondary cleanup failures as suppressed exceptions when an
 - Java 21 or later.
 - A compatible Java runtime environment.
 
-Morph currently uses Java's built-in ImageIO API for image decoding and encoding.
+Morph currently uses Java's built-in ImageIO API for its default image decoding and encoding implementations.
+
+Alternative codec implementations can be integrated through the provider architecture.
 
 ## Usage
 
@@ -208,7 +294,7 @@ The example assumes the input file and output directory already exist.
 
 ```java
 try {
-Path result = engine.process(request);
+    Path result = engine.process(request);
     System.out.println("Image saved to: " + result);
 }
 catch (InvalidImageException e) {
@@ -218,7 +304,7 @@ catch (MorphIOException e) {
     System.err.println("Image I/O failure: " + e.getMessage());
 }
 catch (IllegalArgumentException e) {
-    System.err.println("Invalid configuration: " + e.getMessage());
+    System.err.println("Invalid argument: " + e.getMessage());
 }
 ```
 
@@ -256,18 +342,24 @@ Run the test suite with Maven:
 mvn test
 ```
 
-**Latest verification:** 28 tests passed, with 0 failures and 0 errors.
+Run the complete Maven verification lifecycle:
 
+```bash
+mvn clean verify
+```
+
+**Latest verification:** 39 tests passed, with 0 failures, 0 errors, and 0 skipped.
 
 ## Limitations
 
 The current release intentionally keeps its scope small.
 
-- Only JPEG, PNG, and BMP are exposed through the current format configuration.
+- Only JPEG, PNG, and BMP are supported by the default codec providers.
 - JPEG is the only format with configurable compression quality.
 - Default image limits are currently fixed inside `MorphEngine`.
 - The public API currently uses filesystem paths rather than stream-based input and output.
-- Alternative decoder and encoder implementations can be injected into internal processing components, but a public plugin registration system is not currently provided.
+- New codec implementations can be discovered through Java's `ServiceLoader`, but runtime provider registration and removal are not exposed through the public API.
+- Adding entirely new image formats may require extending the `ImageFormat` model and related format-handling logic.
 - Advanced image transformations and editing operations are outside the current scope.
 
 ## Roadmap
@@ -276,7 +368,7 @@ Potential areas of future development include:
 
 - Configurable engine-level options and image limits.
 - Additional image formats such as WebP and AVIF.
-- Extensible decoder and encoder registration.
+- Runtime registration and configuration of codec providers.
 - Stream-based input and output support.
 - Additional interpolation algorithms.
 - More advanced image optimization capabilities.
@@ -285,4 +377,8 @@ These are potential future improvements, not features of the current release.
 
 ## License
 
-License information has not been specified yet.
+Morph is licensed under the [MIT License](LICENSE).
+
+## Version
+
+Current version: **0.2.0**

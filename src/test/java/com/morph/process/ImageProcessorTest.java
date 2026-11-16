@@ -1,18 +1,25 @@
 package com.morph.process;
 
-import com.morph.codec.ImageDecoder;
+import com.morph.codec.CodecProviderLoader;
+import com.morph.codec.decoder.ImageDecoder;
+import com.morph.codec.decoder.ImageIoDecoder;
+import com.morph.codec.encoder.EncoderRegistry;
 import com.morph.config.ImageConfig;
+import com.morph.config.ImageLimits;
 import com.morph.config.InterpolationMode;
 import com.morph.exception.InvalidImageException;
 import com.morph.exception.MorphIOException;
 import com.morph.format.ImageFormat;
+import com.morph.io.AtomicMovePolicy;
 import com.morph.io.ExistingFilePolicy;
 import com.morph.io.ImageFileWriter;
+import com.morph.io.NioFileMover;
+import com.morph.validation.ImageDimensionValidator;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -20,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,7 +39,6 @@ class ImageProcessorTest {
     @Test
     void shouldProcessImageSuccessfully() throws IOException {
 
-        // Arrange
         File input = tempDir.resolve("input.png").toFile();
         File output = tempDir.resolve("output.png").toFile();
 
@@ -43,25 +50,22 @@ class ImageProcessorTest {
 
         ImageIO.write(source, "png", input);
 
-        ImageConfig config = ImageConfig.builder()
-                .width(800)
-                .height(400)
-                .format(ImageFormat.PNG)
-                .quality(1.0f)
-                .interpolationMode(InterpolationMode.BICUBIC)
-                .build();
+        ImageConfig config = createConfig(
+                800,
+                400,
+                ImageFormat.PNG,
+                1.0f
+        );
 
-        ImageProcessor processor = new ImageProcessor(
+        ImageProcessor processor = createProcessor(
                 input,
                 output,
                 config,
                 ExistingFilePolicy.FAIL_IF_EXISTS
         );
 
-        // Act
         File result = processor.process();
 
-        // Assert
         assertNotNull(result);
         assertTrue(output.exists());
         assertTrue(output.isFile());
@@ -73,30 +77,26 @@ class ImageProcessorTest {
         assertEquals(400, processed.getHeight());
     }
 
-
     @Test
     void shouldThrowExceptionWhenInputDoesNotExist() {
 
-        // Arrange
         File input = tempDir.resolve("missing.png").toFile();
         File output = tempDir.resolve("output.png").toFile();
 
-        ImageConfig config = ImageConfig.builder()
-                .width(800)
-                .height(600)
-                .format(ImageFormat.PNG)
-                .quality(1.0f)
-                .interpolationMode(InterpolationMode.BICUBIC)
-                .build();
+        ImageConfig config = createConfig(
+                800,
+                600,
+                ImageFormat.PNG,
+                1.0f
+        );
 
-        ImageProcessor processor = new ImageProcessor(
+        ImageProcessor processor = createProcessor(
                 input,
                 output,
                 config,
                 ExistingFilePolicy.FAIL_IF_EXISTS
         );
 
-        // Act & Assert
         assertThrows(
                 MorphIOException.class,
                 processor::process
@@ -105,32 +105,28 @@ class ImageProcessorTest {
         assertFalse(output.exists());
     }
 
-
     @Test
     void shouldThrowExceptionWhenInputFormatIsUnsupported() throws IOException {
 
-        // Arrange
         File input = tempDir.resolve("invalid.png").toFile();
         File output = tempDir.resolve("output.png").toFile();
 
         Files.writeString(input.toPath(), "This is not an image.");
 
-        ImageConfig config = ImageConfig.builder()
-                .width(800)
-                .height(600)
-                .format(ImageFormat.PNG)
-                .quality(1.0f)
-                .interpolationMode(InterpolationMode.BICUBIC)
-                .build();
+        ImageConfig config = createConfig(
+                800,
+                600,
+                ImageFormat.PNG,
+                1.0f
+        );
 
-        ImageProcessor processor = new ImageProcessor(
+        ImageProcessor processor = createProcessor(
                 input,
                 output,
                 config,
                 ExistingFilePolicy.FAIL_IF_EXISTS
         );
 
-        // Act & Assert
         assertThrows(
                 InvalidImageException.class,
                 processor::process
@@ -139,16 +135,16 @@ class ImageProcessorTest {
         assertFalse(output.exists());
     }
 
-
     @Test
     void shouldNotOverwriteExistingOutputFile() throws IOException {
 
-        // Arrange
         File input = tempDir.resolve("input.png").toFile();
         File output = tempDir.resolve("output.png").toFile();
 
         BufferedImage source = new BufferedImage(
-                1920, 1080, BufferedImage.TYPE_INT_RGB
+                1920,
+                1080,
+                BufferedImage.TYPE_INT_RGB
         );
 
         ImageIO.write(source, "png", input);
@@ -156,22 +152,20 @@ class ImageProcessorTest {
         byte[] originalContent = "Existing file".getBytes();
         Files.write(output.toPath(), originalContent);
 
-        ImageConfig config = ImageConfig.builder()
-                .width(800)
-                .height(600)
-                .format(ImageFormat.PNG)
-                .quality(1.0f)
-                .interpolationMode(InterpolationMode.BICUBIC)
-                .build();
+        ImageConfig config = createConfig(
+                800,
+                600,
+                ImageFormat.PNG,
+                1.0f
+        );
 
-        ImageProcessor processor = new ImageProcessor(
+        ImageProcessor processor = createProcessor(
                 input,
                 output,
                 config,
                 ExistingFilePolicy.FAIL_IF_EXISTS
         );
 
-        // Act & Assert
         assertThrows(
                 MorphIOException.class,
                 processor::process
@@ -183,12 +177,10 @@ class ImageProcessorTest {
         );
     }
 
-
     @ParameterizedTest
-    @EnumSource(ImageFormat.class)
+    @MethodSource("supportedFormats")
     void shouldSupportAllImageFormats(ImageFormat format) throws IOException {
 
-        // Arrange
         File input = tempDir.resolve("input.png").toFile();
 
         File output = tempDir.resolve(
@@ -205,25 +197,22 @@ class ImageProcessorTest {
 
         float quality = format == ImageFormat.JPEG ? 0.8f : 1.0f;
 
-        ImageConfig config = ImageConfig.builder()
-                .width(800)
-                .height(600)
-                .format(ImageFormat.PNG)
-                .quality(1.0f)
-                .interpolationMode(InterpolationMode.BICUBIC)
-                .build();
+        ImageConfig config = createConfig(
+                800,
+                600,
+                format,
+                quality
+        );
 
-        ImageProcessor processor = new ImageProcessor(
+        ImageProcessor processor = createProcessor(
                 input,
                 output,
                 config,
                 ExistingFilePolicy.FAIL_IF_EXISTS
         );
 
-        // Act
         File result = processor.process();
 
-        // Assert
         assertNotNull(result);
         assertTrue(output.exists());
 
@@ -234,11 +223,17 @@ class ImageProcessorTest {
         assertEquals(450, decoded.getHeight());
     }
 
+    static Stream<ImageFormat> supportedFormats() {
+        return Stream.of(
+                ImageFormat.JPEG,
+                ImageFormat.PNG,
+                ImageFormat.BMP
+        );
+    }
 
     @Test
     void shouldPreserveTransparencyWhenProcessingPng() throws IOException {
 
-        // Arrange
         File input = tempDir.resolve("transparent.png").toFile();
         File output = tempDir.resolve("output.png").toFile();
 
@@ -256,27 +251,24 @@ class ImageProcessorTest {
 
         ImageIO.write(source, "png", input);
 
-        ImageConfig config = ImageConfig.builder()
-                .width(200)
-                .height(200)
-                .format(ImageFormat.PNG)
-                .quality(1.0f)
-                .interpolationMode(InterpolationMode.BICUBIC)
-                .build();
+        ImageConfig config = createConfig(
+                200,
+                200,
+                ImageFormat.PNG,
+                1.0f
+        );
 
-        ImageProcessor processor = new ImageProcessor(
+        ImageProcessor processor = createProcessor(
                 input,
                 output,
                 config,
                 ExistingFilePolicy.FAIL_IF_EXISTS
         );
 
-        // Act
         processor.process();
 
         BufferedImage result = ImageIO.read(output);
 
-        // Assert
         assertNotNull(result);
         assertTrue(result.getColorModel().hasAlpha());
 
@@ -285,11 +277,9 @@ class ImageProcessorTest {
         assertTrue(alpha > 0 && alpha < 255);
     }
 
-
     @Test
     void shouldApplyJpegCompressionQuality() throws IOException {
 
-        // Arrange
         File input = tempDir.resolve("input.png").toFile();
 
         File lowQualityOutput = tempDir.resolve("low.jpg").toFile();
@@ -299,34 +289,34 @@ class ImageProcessorTest {
 
         ImageIO.write(source, "png", input);
 
-        ImageConfig lowQualityConfig = ImageConfig.builder()
-                .width(1000)
-                .height(1000)
-                .format(ImageFormat.JPEG)
-                .quality(0.2f)
-                .interpolationMode(InterpolationMode.BICUBIC)
-                .build();
+        ImageConfig lowQualityConfig = createConfig(
+                1000,
+                1000,
+                ImageFormat.JPEG,
+                0.2f
+        );
 
-        ImageConfig highQualityConfig = ImageConfig.builder()
-                .width(1000)
-                .height(1000)
-                .format(ImageFormat.JPEG)
-                .quality(1.0f)
-                .interpolationMode(InterpolationMode.BICUBIC)
-                .build();
+        ImageConfig highQualityConfig = createConfig(
+                1000,
+                1000,
+                ImageFormat.JPEG,
+                1.0f
+        );
 
-        // Act
-        new ImageProcessor(
-                input, lowQualityOutput, lowQualityConfig,
+        createProcessor(
+                input,
+                lowQualityOutput,
+                lowQualityConfig,
                 ExistingFilePolicy.FAIL_IF_EXISTS
         ).process();
 
-        new ImageProcessor(
-                input, highQualityOutput, highQualityConfig,
+        createProcessor(
+                input,
+                highQualityOutput,
+                highQualityConfig,
                 ExistingFilePolicy.FAIL_IF_EXISTS
         ).process();
 
-        // Assert
         assertTrue(lowQualityOutput.exists());
         assertTrue(highQualityOutput.exists());
 
@@ -337,58 +327,60 @@ class ImageProcessorTest {
     }
 
     private static @NonNull BufferedImage getBufferedImage() {
+
         BufferedImage source = new BufferedImage(
                 1000,
                 1000,
                 BufferedImage.TYPE_INT_RGB
         );
 
-        // Create a detailed image with varying pixel values.
         for (int y = 0; y < source.getHeight(); y++) {
             for (int x = 0; x < source.getWidth(); x++) {
+
                 int red = (x * 255) / source.getWidth();
                 int green = (y * 255) / source.getHeight();
                 int blue = (x * y) % 256;
 
                 source.setRGB(
-                        x, y,
+                        x,
+                        y,
                         new java.awt.Color(red, green, blue).getRGB()
                 );
             }
         }
+
         return source;
     }
 
-
     @Test
     void shouldProcessImageUsingInjectedDecoder() throws IOException {
+
         File input = tempDir.resolve("input.fake").toFile();
         File output = tempDir.resolve("output.png").toFile();
 
         Files.createFile(input.toPath());
 
         BufferedImage source = new BufferedImage(
-                200, 100, BufferedImage.TYPE_INT_RGB
+                200,
+                100,
+                BufferedImage.TYPE_INT_RGB
         );
 
         ImageDecoder decoder = new FakeImageDecoder(source);
 
-        ImageConfig config = ImageConfig.builder()
-                .width(100)
-                .height(100)
-                .format(ImageFormat.PNG)
-                .quality(1.0f)
-                .interpolationMode(InterpolationMode.BICUBIC)
-                .build();
+        ImageConfig config = createConfig(
+                100,
+                100,
+                ImageFormat.PNG,
+                1.0f
+        );
 
-        ImageProcessor processor = new ImageProcessor(
+        ImageProcessor processor = createProcessor(
                 input,
                 output,
                 config,
                 ExistingFilePolicy.FAIL_IF_EXISTS,
-                decoder,
-                new ImageRenderer(),
-                new ImageFileWriter()
+                decoder
         );
 
         processor.process();
@@ -402,4 +394,155 @@ class ImageProcessorTest {
         result.flush();
     }
 
+    @Test
+    void shouldCreateNewImageFormat() {
+        ImageFormat format = new ImageFormat("webp", "webp");
+
+        assertEquals("webp", format.getId());
+        assertEquals("webp", format.getExtension());
+    }
+
+    @Test
+    void shouldTreatDifferentInstancesWithSameIdAsEqual() {
+        ImageFormat first = new ImageFormat("webp", "webp");
+        ImageFormat second = new ImageFormat("webp", "webp");
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
+    void shouldNormalizeIdAndExtensionBeforeComparison() {
+        ImageFormat first = new ImageFormat("webp", "webp");
+        ImageFormat second = new ImageFormat("WEBP", " WEBP ");
+
+        assertEquals(first, second);
+        assertEquals(first.hashCode(), second.hashCode());
+    }
+
+    @Test
+    void shouldRejectNullIDAsInput() {
+        assertThrows(
+                NullPointerException.class,
+                () -> new ImageFormat(null, "webp")
+        );
+    }
+
+    @Test
+    void shouldRejectNullExtensionAsInput() {
+        assertThrows(
+                NullPointerException.class,
+                () -> new ImageFormat("webp", null)
+        );
+    }
+
+    @Test
+    void shouldRejectEmptyIDAsInput() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new ImageFormat("", "webp")
+        );
+    }
+
+    @Test
+    void shouldRejectEmptyExtensionAsInput() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new ImageFormat("webp", "")
+        );
+    }
+
+    @Test
+    void shouldRejectWhiteSpaceIDAsInput() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new ImageFormat("   ", "webp")
+        );
+    }
+
+    @Test
+    void shouldRejectWhiteSpaceExtensionAsInput() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new ImageFormat("webp", "   ")
+        );
+    }
+
+    @Test
+    void shouldReturnIdAsString() {
+        ImageFormat format = new ImageFormat("webp", "webp");
+
+        assertEquals("webp", format.toString());
+    }
+
+    @Test
+    void shouldReturnNormalizedStrings() {
+        ImageFormat format = new ImageFormat(" Webp ", "WeBp");
+
+        assertEquals("webp", format.getId());
+        assertEquals("webp", format.getExtension());
+    }
+
+    private ImageProcessor createProcessor(
+            File input,
+            File output,
+            ImageConfig config,
+            ExistingFilePolicy policy
+    ) {
+        ImageDimensionValidator dimensionValidator =
+                new ImageDimensionValidator(ImageLimits.defaults());
+
+        ImageDecoder decoder = new ImageIoDecoder(dimensionValidator);
+
+        return createProcessor(
+                input,
+                output,
+                config,
+                policy,
+                decoder
+        );
+    }
+
+    private ImageProcessor createProcessor(
+            File input,
+            File output,
+            ImageConfig config,
+            ExistingFilePolicy policy,
+            ImageDecoder decoder
+    ) {
+        EncoderRegistry encoderRegistry = new EncoderRegistry(
+                CodecProviderLoader.loadEncoderProviders()
+        );
+
+        ImageFileWriter fileWriter = new ImageFileWriter(
+                encoderRegistry,
+                AtomicMovePolicy.REQUIRE_ATOMIC,
+                new NioFileMover()
+        );
+
+        return new ImageProcessor(
+                input,
+                output,
+                config,
+                policy,
+                decoder,
+                new ImageRenderer(),
+                fileWriter
+        );
+    }
+
+    private static ImageConfig createConfig(
+            int width,
+            int height,
+            ImageFormat format,
+            float quality
+    ) {
+        return ImageConfig.builder()
+                .width(width)
+                .height(height)
+                .format(format)
+                .quality(quality)
+                .interpolationMode(InterpolationMode.BICUBIC)
+                .build();
+    }
 }

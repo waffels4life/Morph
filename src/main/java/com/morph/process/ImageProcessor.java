@@ -1,9 +1,7 @@
 package com.morph.process;
 
-import com.morph.codec.ImageDecoder;
-import com.morph.codec.ImageIoDecoder;
+import com.morph.codec.decoder.ImageDecoder;
 import com.morph.config.ImageConfig;
-import com.morph.config.ImageLimits;
 import com.morph.exception.MorphIOException;
 import com.morph.geometry.ImageDimensions;
 import com.morph.geometry.ImageScaler;
@@ -33,28 +31,6 @@ public final class ImageProcessor {
             File output,
             ImageConfig config,
             ExistingFilePolicy existingFilePolicy,
-            ImageLimits limits
-    ) {
-        this(
-                input,
-                output,
-                config,
-                existingFilePolicy,
-                new ImageIoDecoder(
-                        limits,
-                        new ImageValidator()
-                ),
-                new ImageRenderer(),
-                new ImageFileWriter()
-        );
-    }
-
-
-    public ImageProcessor(
-            File input,
-            File output,
-            ImageConfig config,
-            ExistingFilePolicy existingFilePolicy,
             ImageDecoder decoder,
             ImageRenderer renderer,
             ImageFileWriter fileWriter
@@ -70,15 +46,6 @@ public final class ImageProcessor {
         this.decoder = Objects.requireNonNull(decoder);
         this.renderer = Objects.requireNonNull(renderer);
         this.fileWriter = Objects.requireNonNull(fileWriter);
-    }
-
-
-    public ImageProcessor(File input,
-                          File output,
-                          ImageConfig config,
-                          ExistingFilePolicy existingFilePolicy) {
-
-        this(input, output, config, existingFilePolicy, ImageLimits.defaults());
     }
 
     public File process() {

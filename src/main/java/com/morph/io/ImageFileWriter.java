@@ -1,8 +1,7 @@
 package com.morph.io;
 
+import com.morph.codec.encoder.EncoderRegistry;
 import com.morph.format.ImageFormat;
-import com.morph.codec.ImageEncoder;
-import com.morph.codec.ImageEncoding;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -14,45 +13,27 @@ import java.util.Objects;
 
 public final class ImageFileWriter {
 
-    private final ImageEncoding encoder;
+    private final EncoderRegistry encoderRegistry;
     private final AtomicMovePolicy atomicMovePolicy;
     private final FileMover fileMover;
 
-    public ImageFileWriter() {
-        this(AtomicMovePolicy.REQUIRE_ATOMIC,
-                new NioFileMover(),
-                new ImageEncoder()
-        );
-    }
-
-    public ImageFileWriter(AtomicMovePolicy atomicMovePolicy) {
-        this(atomicMovePolicy,
-                new NioFileMover(),
-                new ImageEncoder()
-        );
-    }
-
-    public ImageFileWriter(AtomicMovePolicy atomicMovePolicy, FileMover fileMover) {
-        this(atomicMovePolicy,
-                fileMover,
-                new ImageEncoder()
-        );
-    }
-
-    public ImageFileWriter(AtomicMovePolicy atomicMovePolicy,
-                           FileMover fileMover,
-                           ImageEncoding encoder) {
-
+    public ImageFileWriter(
+            EncoderRegistry encoderRegistry,
+            AtomicMovePolicy atomicMovePolicy,
+            FileMover fileMover
+    ) {
+        this.encoderRegistry = Objects.requireNonNull(encoderRegistry);
         this.atomicMovePolicy = Objects.requireNonNull(atomicMovePolicy);
         this.fileMover = Objects.requireNonNull(fileMover);
-        this.encoder = Objects.requireNonNull(encoder);
     }
 
-    public void write(BufferedImage image,
-                      File output,
-                      ImageFormat format,
-                      float quality,
-                      ExistingFilePolicy policy) throws IOException {
+    public void write(
+            BufferedImage image,
+            File output,
+            ImageFormat format,
+            float quality,
+            ExistingFilePolicy policy
+    ) throws IOException {
 
         Objects.requireNonNull(image, "Image cannot be null.");
         Objects.requireNonNull(output, "Output cannot be null.");
@@ -62,19 +43,13 @@ public final class ImageFileWriter {
         Path outputPath = output.toPath().toAbsolutePath();
         Path parent = outputPath.getParent();
 
-        Path temp = Files.createTempFile(
-                parent,
-                "morph-",
-                ".tmp"
-        );
-
+        Path temp = Files.createTempFile(parent, "morph-", ".tmp");
         Throwable failure = null;
 
         try {
-            encoder.encode(
+            encoderRegistry.getEncoder(format).encode(
                     image,
                     temp.toFile(),
-                    format,
                     quality
             );
 
@@ -84,9 +59,7 @@ public final class ImageFileWriter {
             }
 
         }
-        catch (IOException
-               | RuntimeException
-               | Error e) {
+        catch (IOException | RuntimeException | Error e) {
             failure = e;
             throw e;
         }
@@ -101,9 +74,7 @@ public final class ImageFileWriter {
         }
     }
 
-
     private void moveReplacing(Path source, Path target) throws IOException {
-
         try {
             fileMover.moveAtomically(source, target);
         }

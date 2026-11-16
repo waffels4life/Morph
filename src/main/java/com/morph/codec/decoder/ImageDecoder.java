@@ -1,4 +1,4 @@
-package com.morph.codec;
+package com.morph.codec.decoder;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

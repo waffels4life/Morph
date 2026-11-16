@@ -1,6 +1,6 @@
 package com.morph.process;
 
-import com.morph.codec.ImageDecoder;
+import com.morph.codec.decoder.ImageDecoder;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

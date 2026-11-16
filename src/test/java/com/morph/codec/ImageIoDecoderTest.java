@@ -1,8 +1,9 @@
 package com.morph.codec;
 
+import com.morph.codec.decoder.ImageIoDecoder;
 import com.morph.config.ImageLimits;
 import com.morph.exception.InvalidImageException;
-import com.morph.validation.ImageValidator;
+import com.morph.validation.ImageDimensionValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -30,9 +31,11 @@ class ImageIoDecoderTest {
 
         ImageIO.write(source, "png", input);
 
+        ImageDimensionValidator dimensionValidator =
+                new ImageDimensionValidator(ImageLimits.defaults());
+
         ImageIoDecoder decoder = new ImageIoDecoder(
-                ImageLimits.defaults(),
-                new ImageValidator()
+                dimensionValidator
         );
 
         BufferedImage result = decoder.decode(input);
@@ -46,9 +49,11 @@ class ImageIoDecoderTest {
 
     @Test
     void shouldThrowExceptionWhenInputIsNull() {
+        ImageDimensionValidator dimensionValidator =
+                new ImageDimensionValidator(ImageLimits.defaults());
+
         ImageIoDecoder decoder = new ImageIoDecoder(
-                ImageLimits.defaults(),
-                new ImageValidator()
+                dimensionValidator
         );
 
         assertThrows(
@@ -61,9 +66,11 @@ class ImageIoDecoderTest {
     void shouldThrowExceptionWhenInputDoesNotExist() {
         File input = tempDir.resolve("missing.png").toFile();
 
+        ImageDimensionValidator dimensionValidator =
+                new ImageDimensionValidator(ImageLimits.defaults());
+
         ImageIoDecoder decoder = new ImageIoDecoder(
-                ImageLimits.defaults(),
-                new ImageValidator()
+                dimensionValidator
         );
 
         assertThrows(
@@ -78,9 +85,11 @@ class ImageIoDecoderTest {
 
         Files.writeString(input.toPath(), "This is not an image.");
 
+        ImageDimensionValidator dimensionValidator =
+                new ImageDimensionValidator(ImageLimits.defaults());
+
         ImageIoDecoder decoder = new ImageIoDecoder(
-                ImageLimits.defaults(),
-                new ImageValidator()
+                dimensionValidator
         );
 
         assertThrows(
@@ -94,15 +103,19 @@ class ImageIoDecoderTest {
         File input = tempDir.resolve("large.png").toFile();
 
         BufferedImage image = new BufferedImage(
-                200, 200, BufferedImage.TYPE_INT_RGB
+                200,
+                100,
+                BufferedImage.TYPE_INT_RGB
         );
 
         ImageIO.write(image, "png", input);
 
-        ImageIoDecoder decoder = new ImageIoDecoder(
-                new ImageLimits(500, 500, 30_000L),
-                new ImageValidator()
-        );
+        ImageLimits limits = new ImageLimits(500, 500, 10_000);
+
+        ImageDimensionValidator validator =
+                new ImageDimensionValidator(limits);
+
+        ImageIoDecoder decoder = new ImageIoDecoder(validator);
 
         assertThrows(
                 IllegalArgumentException.class,

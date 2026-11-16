@@ -1,8 +1,7 @@
-package com.morph.codec;
+package com.morph.codec.decoder;
 
-import com.morph.config.ImageLimits;
 import com.morph.exception.InvalidImageException;
-import com.morph.validation.ImageValidator;
+import com.morph.validation.ImageDimensionValidator;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -15,12 +14,10 @@ import java.util.Objects;
 
 public final class ImageIoDecoder implements ImageDecoder {
 
-    private final ImageLimits limits;
-    private final ImageValidator validator;
+    private final ImageDimensionValidator dimensionValidator;
 
-    public ImageIoDecoder(ImageLimits limits, ImageValidator validator) {
-        this.limits = Objects.requireNonNull(limits);
-        this.validator = Objects.requireNonNull(validator);
+    public ImageIoDecoder(ImageDimensionValidator dimensionValidator) {
+        this.dimensionValidator = Objects.requireNonNull(dimensionValidator);
     }
 
     @Override public BufferedImage decode(File input) throws IOException {
@@ -50,7 +47,7 @@ public final class ImageIoDecoder implements ImageDecoder {
                 int width = reader.getWidth(0);
                 int height = reader.getHeight(0);
 
-                validator.validateDimensions(width, height, limits);
+                dimensionValidator.validate(width, height);
 
                 BufferedImage image = reader.read(0);
 
