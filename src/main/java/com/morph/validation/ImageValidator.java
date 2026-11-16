@@ -1,6 +1,5 @@
 package com.morph.validation;
 
-import com.morph.config.ImageLimits;
 import com.morph.io.ExistingFilePolicy;
 
 import java.io.File;
@@ -47,6 +46,13 @@ public final class ImageValidator {
             );
 
         File parent = output.getAbsoluteFile().getParentFile();
+
+        if (parent == null)
+            throw new FileSystemException(
+                    output.getAbsolutePath(),
+                    null,
+                    "Output parent directory is unavailable."
+            );
 
         if (!parent.exists())
             throw new FileSystemException(
