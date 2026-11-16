@@ -1,6 +1,10 @@
 package com.morph.io;
 
 import com.morph.codec.FailingImageEncoder;
+import com.morph.codec.encoder.EncoderRegistry;
+import com.morph.codec.encoder.ImageEncoder;
+import com.morph.codec.encoder.ImageEncoderProvider;
+import com.morph.codec.encoder.ImageIoEncoder;
 import com.morph.format.ImageFormat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -12,6 +16,7 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,6 +31,34 @@ public class ImageFileWriterTest {
     @TempDir
     Path tempDir;
 
+
+    private ImageFileWriter createWriter(
+            AtomicMovePolicy policy,
+            FileMover mover,
+            ImageEncoder encoder
+    ) {
+        ImageEncoderProvider provider = new ImageEncoderProvider() {
+
+            @Override
+            public Set<ImageFormat> getSupportedFormats() {
+                return Set.of(ImageFormat.PNG);
+            }
+
+            @Override
+            public ImageEncoder createEncoder(ImageFormat format) {
+                if (format != ImageFormat.PNG)
+                    throw new IllegalArgumentException("Unsupported format.");
+
+                return encoder;
+            }
+        };
+
+        EncoderRegistry registry = new EncoderRegistry(Set.of(provider));
+
+        return new ImageFileWriter(registry, policy, mover);
+    }
+
+
     @Test
     void shouldNotFallbackWhenAtomicMoveIsRequired() throws IOException {
 
@@ -33,9 +66,10 @@ public class ImageFileWriterTest {
         UnsupportedAtomicFileMover mover =
                 new UnsupportedAtomicFileMover();
 
-        ImageFileWriter writer = new ImageFileWriter(
+        ImageFileWriter writer = createWriter(
                 AtomicMovePolicy.REQUIRE_ATOMIC,
-                mover
+                new NioFileMover(),
+                new ImageIoEncoder(ImageFormat.PNG)
         );
 
         BufferedImage image = new BufferedImage(
@@ -66,9 +100,10 @@ public class ImageFileWriterTest {
         UnsupportedAtomicFileMover mover =
                 new UnsupportedAtomicFileMover();
 
-        ImageFileWriter writer = new ImageFileWriter(
-                AtomicMovePolicy.ALLOW_NON_ATOMIC_FALLBACK,
-                mover
+        ImageFileWriter writer = createWriter(
+                AtomicMovePolicy.REQUIRE_ATOMIC,
+                new NioFileMover(),
+                new FailingImageEncoder()
         );
 
         BufferedImage image = new BufferedImage(
@@ -114,9 +149,10 @@ public class ImageFileWriterTest {
 
         FailingFileMover mover = new FailingFileMover();
 
-        ImageFileWriter writer = new ImageFileWriter(
-                AtomicMovePolicy.ALLOW_NON_ATOMIC_FALLBACK,
-                mover
+        ImageFileWriter writer = createWriter(
+                AtomicMovePolicy.REQUIRE_ATOMIC,
+                new NioFileMover(),
+                new ImageIoEncoder(ImageFormat.PNG)
         );
 
         BufferedImage image = new BufferedImage(
@@ -144,7 +180,11 @@ public class ImageFileWriterTest {
     void shouldNotOverwriteExistingFileWhenPolicyIsFailIfExists()
             throws IOException {
 
-        ImageFileWriter writer = new ImageFileWriter();
+        ImageFileWriter writer = createWriter(
+                AtomicMovePolicy.REQUIRE_ATOMIC,
+                new NioFileMover(),
+                new ImageIoEncoder(ImageFormat.PNG)
+        );
 
         BufferedImage image = new BufferedImage(
                 100, 100, BufferedImage.TYPE_INT_RGB
@@ -176,7 +216,11 @@ public class ImageFileWriterTest {
     void shouldReplaceExistingFileWhenPolicyIsReplaceExisting()
             throws IOException {
 
-        ImageFileWriter writer = new ImageFileWriter();
+        ImageFileWriter writer = createWriter(
+                AtomicMovePolicy.REQUIRE_ATOMIC,
+                new NioFileMover(),
+                new ImageIoEncoder(ImageFormat.PNG)
+        );
 
         BufferedImage image = new BufferedImage(
                 100, 100, BufferedImage.TYPE_INT_RGB
@@ -211,10 +255,10 @@ public class ImageFileWriterTest {
 
         FailingImageEncoder encoder = new FailingImageEncoder();
 
-        ImageFileWriter writer = new ImageFileWriter(
+        ImageFileWriter writer = createWriter(
                 AtomicMovePolicy.REQUIRE_ATOMIC,
                 new NioFileMover(),
-                encoder
+                new ImageIoEncoder(ImageFormat.PNG)
         );
 
         BufferedImage image = new BufferedImage(
@@ -244,10 +288,10 @@ public class ImageFileWriterTest {
     @Test
     void shouldPreserveExistingFileWhenEncodingFails() throws IOException {
 
-        ImageFileWriter writer = new ImageFileWriter(
+        ImageFileWriter writer = createWriter(
                 AtomicMovePolicy.REQUIRE_ATOMIC,
                 new NioFileMover(),
-                new FailingImageEncoder()
+                new ImageIoEncoder(ImageFormat.PNG)
         );
 
         BufferedImage image = new BufferedImage(
